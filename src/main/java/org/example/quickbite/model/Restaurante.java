@@ -28,7 +28,7 @@ public class Restaurante {
     @Column(nullable = false, length = 9)
     private String telefono;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TINYINT(1) DEFAULT 1")
     private Boolean activo = true;
 
     @Column(length = 500)
@@ -40,4 +40,11 @@ public class Restaurante {
     // Relación 1:N con Producto
     @OneToMany(mappedBy = "restaurante", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Producto> productos = new ArrayList<>();
+
+    @PrePersist
+    public void prePersist() {
+        if (this.activo == null) {
+            this.activo = true;
+        }
+    }
 }

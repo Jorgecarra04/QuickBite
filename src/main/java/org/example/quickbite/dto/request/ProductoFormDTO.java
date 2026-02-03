@@ -34,6 +34,5 @@ public class ProductoFormDTO {
     @NotNull(message = "El restaurante es obligatorio")
     private Long restauranteId;
 
-    @NotNull(message = "La categoría es obligatoria")
     private Long categoriaId;
 }

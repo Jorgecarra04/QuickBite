@@ -50,22 +50,39 @@ public class ProductoService {
     @Transactional
     public ProductoDetalleDTO crear(ProductoFormDTO dto) {
         log.info("Creando nuevo producto: {}", dto.getNombre());
+        log.info("Datos recibidos - RestauranteId: {}, CategoriaId: {}",
+                dto.getRestauranteId(), dto.getCategoriaId());
 
         Restaurante restaurante = restauranteRepository.findById(dto.getRestauranteId())
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Restaurante no encontrado con ID: " + dto.getRestauranteId()
                 ));
 
-        Categoria categoria = categoriaRepository.findById(dto.getCategoriaId())
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Categoría no encontrada con ID: " + dto.getCategoriaId()
-                ));
+        // ✅ Auto-asignar categoría por defecto si no se especifica
+        Categoria categoria = null;
+        if (dto.getCategoriaId() != null) {
+            categoria = categoriaRepository.findById(dto.getCategoriaId())
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Categoría no encontrada con ID: " + dto.getCategoriaId()
+                    ));
+        } else {
+            // Buscar o crear categoría por defecto
+            categoria = categoriaRepository.findById(1L)
+                    .orElseGet(() -> {
+                        log.info("Creando categoría por defecto...");
+                        Categoria nuevaCategoria = new Categoria();
+                        nuevaCategoria.setNombre("General");
+                        nuevaCategoria.setDescripcion("Categoría general para productos");
+                        return categoriaRepository.save(nuevaCategoria);
+                    });
+        }
 
         Producto producto = productoMapper.toEntity(dto);
         producto.setRestaurante(restaurante);
         producto.setCategoria(categoria);
 
         Producto guardado = productoRepository.save(producto);
+        log.info("✅ Producto creado exitosamente con ID: {}", guardado.getId());
 
         return productoMapper.toDetalleDTO(guardado);
     }
@@ -89,7 +106,8 @@ public class ProductoService {
         }
 
         if (dto.getCategoriaId() != null &&
-                !producto.getCategoria().getId().equals(dto.getCategoriaId())) {
+                (producto.getCategoria() == null ||
+                        !producto.getCategoria().getId().equals(dto.getCategoriaId()))) {
             Categoria categoria = categoriaRepository.findById(dto.getCategoriaId())
                     .orElseThrow(() -> new ResourceNotFoundException(
                             "Categoría no encontrada con ID: " + dto.getCategoriaId()

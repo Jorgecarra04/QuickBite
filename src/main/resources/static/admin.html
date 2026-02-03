@@ -519,8 +519,6 @@
         </div>
     </div>
 
-    <!-- TAB: CATEGORÍAS -->
-
     <!-- TAB: PEDIDOS -->
     <div id="tab-pedidos" class="tab-content">
         <div class="card">
@@ -691,13 +689,13 @@
                         <label class="form-label" for="productoRestaurante">Restaurante *</label>
                         <select class="form-control" id="productoRestaurante" required></select>
                     </div>
-                </div>
-                <div class="form-group">
-                    <label class="form-label" for="productoDisponible">Disponible</label>
-                    <select class="form-control" id="productoDisponible">
-                        <option value="true">Sí</option>
-                        <option value="false">No</option>
-                    </select>
+                    <div class="form-group">
+                        <label class="form-label" for="productoDisponible">Disponible</label>
+                        <select class="form-control" id="productoDisponible">
+                            <option value="true">Sí</option>
+                            <option value="false">No</option>
+                        </select>
+                    </div>
                 </div>
                 <button type="submit" class="btn btn-primary" style="width:100%">Guardar</button>
             </form>
@@ -928,15 +926,22 @@
 
             tbody.innerHTML = '';
             console.log('🍽️ DEBUG RESTAURANTES - Total:', data.content.length);
+            console.log('🍽️ Primer restaurante completo:', data.content[0]);
             data.content.forEach(item => {
-                console.log('🍽️ Restaurante:', {id: item.id, nombre: item.nombre, telefono: item.telefono, tipo_telefono: typeof item.telefono});
+                console.log('🍽️ Restaurante:', {
+                    id: item.id,
+                    nombre: item.nombre,
+                    activo: item.activo,
+                    tipo_activo: typeof item.activo,
+                    activo_raw: JSON.stringify(item.activo)
+                });
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td><strong>#${item.id}</strong></td>
                     <td>${item.nombre}</td>
                     <td>${item.direccion}</td>
                     <td>${item.telefono || ''}</td>
-                    <td><span class="badge ${item.activo ? 'badge-success' : 'badge-danger'}">${item.activo ? 'Activo' : 'Inactivo'}</span></td>
+                    <td><span class="badge ${item.activo === true ? 'badge-success' : 'badge-danger'}">${item.activo === true ? 'Activo' : 'Inactivo'}</span></td>
                     <td>
                         <div class="actions">
                             <button class="btn btn-secondary" onclick="editRestaurante(${item.id})">Editar</button>
@@ -1100,7 +1105,7 @@
 
     async function loadProductoSelects() {
         try {
-            // Cargar restaurantes
+            // Cargar solo restaurantes
             const resRestaurantes = await fetchWithAuth(`${API_URL}/restaurantes?size=100`);
             const restaurantes = await resRestaurantes.json();
 
@@ -1120,13 +1125,20 @@
         }
     }
 
-    function openProductoModal(id = null) {
+    // FIX PRINCIPAL: Cargar restaurantes ANTES de abrir el modal
+    async function openProductoModal(id = null) {
         currentProductoId = id;
         document.getElementById('productoModalTitle').textContent = id ? 'Editar Producto' : 'Nuevo Producto';
         document.getElementById('productoForm').reset();
         document.getElementById('productoAlert').classList.remove('show');
 
-        if (id) loadProductoData(id);
+        // IMPORTANTE: Cargar los restaurantes PRIMERO
+        await loadProductoSelects();
+
+        // Luego cargar los datos si es edición
+        if (id) {
+            await loadProductoData(id);
+        }
 
         document.getElementById('productoModal').classList.add('show');
     }
@@ -1156,14 +1168,26 @@
     async function submitProducto(e) {
         e.preventDefault();
 
+        // Validar que se haya seleccionado un restaurante
+        const restauranteId = document.getElementById('productoRestaurante').value;
+        if (!restauranteId) {
+            showAlert('productoAlert', 'error', 'Debe seleccionar un restaurante');
+            return;
+        }
+
+        const descripcionValue = document.getElementById('productoDescripcion').value.trim();
+
         const data = {
-            nombre: document.getElementById('productoNombre').value,
-            descripcion: document.getElementById('productoDescripcion').value || null,
+            nombre: document.getElementById('productoNombre').value.trim(),
+            descripcion: descripcionValue || null,
             precio: parseFloat(document.getElementById('productoPrecio').value),
             stock: parseInt(document.getElementById('productoStock').value),
-            restauranteId: parseInt(document.getElementById('productoRestaurante').value),
+            restauranteId: parseInt(restauranteId),
+            // categoriaId se auto-asigna en el backend
             disponible: document.getElementById('productoDisponible').value === 'true'
         };
+
+        console.log('📦 Enviando producto:', data);
 
         try {
             const url = currentProductoId
@@ -1186,9 +1210,11 @@
                 }, 1000);
             } else {
                 const error = await response.json();
+                console.error('❌ Error del servidor:', error);
                 showAlert('productoAlert', 'error', error.message || 'Error al guardar');
             }
         } catch (error) {
+            console.error('❌ Error de conexión:', error);
             showAlert('productoAlert', 'error', 'Error de conexión');
         }
     }
@@ -1217,8 +1243,6 @@
             alert('Error de conexión');
         }
     }
-
-    // ===== CATEGORÍAS =====
 
     // ===== PEDIDOS =====
     async function loadPedidos() {
@@ -1498,9 +1522,7 @@
                 filtered = filtered.filter(r => r.activo.toString() === activoFilter);
             }
 
-            console.log('🚗 DEBUG REPARTIDORES - Total:', filtered.length);
             filtered.forEach(item => {
-                console.log('🚗 Repartidor:', {id: item.id, nombre: item.nombre, email: item.email, telefono: item.telefono});
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td><strong>#${item.id}</strong></td>
