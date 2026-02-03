@@ -58,7 +58,7 @@ public class ProductoService {
                         "Restaurante no encontrado con ID: " + dto.getRestauranteId()
                 ));
 
-        // ✅ Auto-asignar categoría por defecto si no se especifica
+        //  Auto-asignar categoría por defecto si no se especifica
         Categoria categoria = null;
         if (dto.getCategoriaId() != null) {
             categoria = categoriaRepository.findById(dto.getCategoriaId())
@@ -82,7 +82,7 @@ public class ProductoService {
         producto.setCategoria(categoria);
 
         Producto guardado = productoRepository.save(producto);
-        log.info("✅ Producto creado exitosamente con ID: {}", guardado.getId());
+        log.info(" Producto creado exitosamente con ID: {}", guardado.getId());
 
         return productoMapper.toDetalleDTO(guardado);
     }
