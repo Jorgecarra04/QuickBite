@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickBite - Tu comida favorita</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root{--primary:#ff6b35;--secondary:#0f172a;--bg:#f4f6f9;--white:#fff;--gray:#6b7280;--border:#e5e7eb;--shadow:0 10px 25px rgba(0,0,0,0.08);--success:#06d6a0;--danger:#ef476f}
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--secondary)}
+        .navbar{background:var(--white);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;box-shadow:var(--shadow)}
+        .nav-container{max-width:1200px;margin:0 auto;padding:1rem 1.5rem;display:flex;justify-content:space-between;align-items:center}
+        .brand{font-size:1.8rem;font-weight:700;color:var(--primary)}
+        .nav-right{display:flex;gap:1rem;align-items:center}
+        .nav-btn{background:none;border:none;padding:.6rem 1rem;border-radius:8px;cursor:pointer;font-weight:600;font-size:.95rem;color:var(--secondary);transition:.2s}
+        .nav-btn:hover{background:var(--bg)}
+        .nav-btn.active{background:var(--primary);color:white}
+        .cart-btn{background:var(--primary);color:white;position:relative}
+        .cart-btn:hover{background:#e85b2a}
+        .cart-badge{position:absolute;top:-5px;right:-5px;background:var(--danger);color:white;border-radius:50%;width:20px;height:20px;font-size:.75rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+        .user-menu{position:relative}
+        .user-btn{background:var(--secondary);color:white;display:flex;align-items:center;gap:.5rem;padding:.6rem 1.2rem}
+        .user-btn:hover{background:#1e293b}
+        .user-avatar{width:32px;height:32px;border-radius:50%;background:var(--primary);color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem}
+        .dropdown{position:absolute;top:calc(100% + 8px);right:0;background:white;border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);min-width:220px;display:none;overflow:hidden}
+        .dropdown.show{display:block}
+        .dropdown-header{padding:1rem;background:linear-gradient(135deg,var(--primary),#ff8c5a);color:white}
+        .dropdown-user-name{font-weight:700;font-size:1rem;margin-bottom:.2rem}
+        .dropdown-user-email{font-size:.85rem;opacity:.9}
+        .dropdown-item{padding:1rem 1.2rem;cursor:pointer;border-bottom:1px solid var(--border);font-size:.95rem;display:flex;align-items:center;gap:.8rem;transition:.2s}
+        .dropdown-item:last-child{border:none}
+        .dropdown-item:hover{background:var(--bg)}
+        .dropdown-item.logout{color:var(--danger)}
+        .dropdown-icon{width:20px;text-align:center}
+        .container{max-width:1200px;margin:0 auto;padding:2rem 1.5rem}
+        .section{display:none}
+        .section.active{display:block}
+        .section-title{font-size:1.8rem;font-weight:700;margin-bottom:1.5rem}
+        .filters{display:flex;gap:.8rem;margin-bottom:2rem;flex-wrap:wrap}
+        .filter-btn{padding:.7rem 1.2rem;border:1px solid var(--border);background:white;border-radius:8px;cursor:pointer;font-weight:600;font-size:.9rem;transition:.2s}
+        .filter-btn:hover{border-color:var(--primary);color:var(--primary)}
+        .filter-btn.active{background:var(--primary);color:white;border-color:var(--primary)}
+        .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.5rem}
+        .card{background:white;border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:.2s;cursor:pointer}
+        .card:hover{box-shadow:var(--shadow);transform:translateY(-4px)}
+        .card-img{width:100%;height:200px;object-fit:cover;background:linear-gradient(135deg,#f3f4f6,#e5e7eb)}
+        .card-body{padding:1.2rem}
+        .card-title{font-size:1.1rem;font-weight:600;margin-bottom:.4rem}
+        .card-desc{font-size:.85rem;color:var(--gray);margin-bottom:.8rem;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+        .card-footer{display:flex;justify-content:space-between;align-items:center;margin-top:1rem}
+        .price{font-size:1.3rem;font-weight:700;color:var(--primary)}
+        .btn{padding:.6rem 1.2rem;border:none;border-radius:8px;font-weight:600;cursor:pointer;font-size:.9rem;transition:.2s}
+        .btn-primary{background:var(--primary);color:white}
+        .btn-primary:hover{background:#e85b2a}
+        .btn-secondary{background:var(--secondary);color:white}
+        .btn-secondary:hover{background:#1e293b}
+        .badge{display:inline-block;padding:.3rem .8rem;border-radius:6px;font-size:.85rem;font-weight:600}
+        .badge-success{background:#d1fae5;color:#065f46}
+        .badge-stock{background:#fef3c7;color:#92400e}
+        .loader{text-align:center;padding:2rem;color:var(--gray)}
+        .empty{text-align:center;padding:3rem;color:var(--gray)}
+        .hidden{display:none!important}
+        .modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);display:none;justify-content:center;align-items:center;z-index:1000}
+        .modal.show{display:flex}
+        .modal-content{background:white;border-radius:12px;width:90%;max-width:500px;max-height:90vh;overflow-y:auto}
+        .modal-header{padding:1.5rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+        .modal-title{font-size:1.5rem;font-weight:700}
+        .close{background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--gray)}
+        .modal-body{padding:1.5rem}
+        .cart-empty{text-align:center;padding:3rem 1rem;color:var(--gray)}
+        .cart-item{display:flex;justify-content:space-between;align-items:center;padding:1rem 0;border-bottom:1px solid var(--border)}
+        .cart-item-info{flex:1}
+        .cart-item-name{font-weight:600;display:block;margin-bottom:.3rem}
+        .cart-item-price{color:var(--primary);font-weight:600}
+        .cart-qty{display:flex;align-items:center;gap:.5rem}
+        .qty-btn{width:30px;height:30px;border:1px solid var(--border);background:white;border-radius:6px;cursor:pointer;font-weight:700;font-size:1.1rem}
+        .qty-btn:hover{background:var(--bg)}
+        .cart-summary{padding:1rem 0;border-top:2px solid var(--border)}
+        .cart-total{display:flex;justify-content:space-between;align-items:center;font-size:1.3rem;font-weight:700;margin-bottom:1rem}
+        .form-group{margin-bottom:1.2rem}
+        .form-label{display:block;font-weight:600;margin-bottom:.5rem;font-size:.9rem}
+        .form-control{width:100%;padding:.8rem 1rem;border:1px solid var(--border);border-radius:8px;font-size:.95rem}
+        .form-control:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(255,107,53,.15)}
+        textarea.form-control{resize:vertical;min-height:80px}
+        .form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+        .profile-card{background:white;border-radius:12px;padding:2rem;border:1px solid var(--border)}
+        .profile-header{display:flex;align-items:center;gap:1.5rem;margin-bottom:2rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border)}
+        .profile-avatar{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--primary),#ff8c5a);color:white;display:flex;align-items:center;justify-content:center;font-size:2rem;font-weight:700}
+        .profile-info{flex:1}
+        .profile-name{font-size:1.5rem;font-weight:700;margin-bottom:.3rem}
+        .profile-email{color:var(--gray)}
+        .profile-detail{display:flex;padding:.8rem 0;border-bottom:1px solid var(--border)}
+        .profile-detail:last-child{border:none}
+        .profile-detail-label{font-weight:600;width:150px;color:var(--gray)}
+        .order-card{background:white;border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin-bottom:1rem;transition:.2s}
+        .order-card:hover{box-shadow:var(--shadow)}
+        .order-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;padding-bottom:1rem;border-bottom:1px solid var(--border)}
+        .order-number{font-weight:700;font-size:1.1rem}
+        .order-status{padding:.4rem .8rem;border-radius:6px;font-size:.85rem;font-weight:600}
+        .status-pendiente{background:#fef3c7;color:#92400e}
+        .status-en_preparacion{background:#dbeafe;color:#1e40af}
+        .status-en_camino{background:#dbeafe;color:#1e40af}
+        .status-entregado{background:#d1fae5;color:#065f46}
+        .status-cancelado{background:#fee2e2;color:#991b1b}
+        .order-details{margin-bottom:1rem}
+        .order-detail-row{display:flex;justify-content:space-between;padding:.5rem 0;font-size:.9rem}
+        .order-detail-label{color:var(--gray);font-weight:600}
+        .order-total{display:flex;justify-content:space-between;align-items:center;font-size:1.2rem;font-weight:700;padding-top:1rem;border-top:1px solid var(--border)}
+
+        .alert{padding:1rem 1.2rem;border-radius:8px;margin-bottom:1.5rem;border-left:4px solid}
+        .alert-warning{background:#fef3c7;color:#92400e;border-color:#f59e0b}
+        .alert-info{background:#dbeafe;color:#1e40af;border-color:#3b82f6}
+        @media(max-width:768px){.form-row{grid-template-columns:1fr}.grid{grid-template-columns:1fr}.profile-header{flex-direction:column;text-align:center}}
+    </style>
+</head>
+<body>
+<body>
+<div class="navbar">
+    <div class="nav-container">
+        <div class="brand">🍔 QuickBite</div>
+        <div class="nav-right">
+            <button class="nav-btn active" onclick="showSection('restaurants')">Restaurantes</button>
+            <button class="nav-btn cart-btn" onclick="openCart()">🛒 Carrito<span class="cart-badge" id="cartBadge">0</span></button>
+            <div class="user-menu">
+                <button class="nav-btn user-btn" onclick="toggleUserMenu()">
+                    <div class="user-avatar" id="navAvatar">U</div>
+                    <span id="navUsername">Usuario</span>
+                </button>
+                <div class="dropdown" id="userMenu">
+                    <div class="dropdown-header">
+                        <div class="dropdown-user-name" id="dropdownUsername">Usuario</div>
+                        <div class="dropdown-user-email" id="dropdownEmail"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="2e5b5d5b4f5c47416e4b434f4742004d4143">[email&#160;protected]</a></div>
+                    </div>
+                    <div class="dropdown-item" onclick="showSection('profile')"><span class="dropdown-icon"></span><span>Mi Perfil</span></div>
+                    <div class="dropdown-item" onclick="showSection('orders')"><span class="dropdown-icon"></span><span>Mis Pedidos</span></div>
+                    <div class="dropdown-item logout" onclick="logout()"><span class="dropdown-icon"></span><span>Cerrar Sesión</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container">
+    <div id="section-restaurants" class="section active">
+        <h2 class="section-title">Restaurantes</h2>
+        <div id="restaurantLoader" class="loader">Cargando restaurantes...</div>
+        <div id="restaurantGrid" class="grid"></div>
+        <div id="productsSection" class="hidden" style="margin-top:3rem">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
+                <h2 class="section-title" style="margin:0" id="restaurantName"></h2>
+                <button class="btn btn-secondary" onclick="backToRestaurants()">← Volver</button>
+            </div>
+
+            <div id="productLoader" class="loader hidden">Cargando productos...</div>
+            <div id="productGrid" class="grid"></div>
+            <div id="productEmpty" class="empty hidden">No hay productos disponibles</div>
+        </div>
+    </div>
+    <div id="section-orders" class="section">
+        <h2 class="section-title">Mis Pedidos</h2>
+        <div class="filters">
+            <button class="filter-btn active" onclick="filterOrders('all')">Todos</button>
+            <button class="filter-btn" onclick="filterOrders('PENDIENTE')">Pendiente</button>
+            <button class="filter-btn" onclick="filterOrders('EN_PREPARACION')">En Preparación</button>
+            <button class="filter-btn" onclick="filterOrders('EN_CAMINO')">En Camino</button>
+            <button class="filter-btn" onclick="filterOrders('ENTREGADO')">Entregado</button>
+        </div>
+        <div id="orderLoader" class="loader">Cargando pedidos...</div>
+        <div id="orderContainer"></div>
+    </div>
+    <div id="section-profile" class="section">
+        <h2 class="section-title">Mi Perfil</h2>
+        <div id="profileLoader" class="loader">Cargando...</div>
+        <div id="profileError" class="hidden"></div>
+        <div id="profileCard" class="profile-card hidden">
+            <div class="profile-header">
+                <div class="profile-avatar" id="profileAvatar">U</div>
+                <div class="profile-info">
+                    <div class="profile-name" id="profileName">Usuario</div>
+                    <div class="profile-email" id="profileEmail"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="80e5ede1e9ecc0e5f8e1edf0ece5aee3efed">[email&#160;protected]</a></div>
+                </div>
+            </div>
+            <div class="profile-detail"><div class="profile-detail-label">Teléfono:</div><div id="profilePhone">-</div></div>
+            <div class="profile-detail"><div class="profile-detail-label">Dirección:</div><div id="profileAddress">-</div></div>
+            <div class="profile-detail"><div class="profile-detail-label">Ciudad:</div><div id="profileCity">-</div></div>
+            <div class="profile-detail"><div class="profile-detail-label">Código Postal:</div><div id="profilePostalCode">-</div></div>
+            <div class="profile-detail"><div class="profile-detail-label">Provincia:</div><div id="profileProvince">-</div></div>
+        </div>
+    </div>
+</div>
+<div id="cartModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header"><div class="modal-title">Carrito de Compras</div><button class="close" onclick="closeCart()">&times;</button></div>
+        <div class="modal-body">
+            <div id="cartEmpty" class="cart-empty">Tu carrito está vacío</div>
+            <div id="cartItems" class="hidden"></div>
+            <div id="cartSummary" class="cart-summary hidden">
+                <div class="cart-total"><span>Total:</span><span id="cartTotal">€0.00</span></div>
+                <button class="btn btn-primary" style="width:100%" onclick="openCheckout()">Realizar Pedido</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="checkoutModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header"><div class="modal-title">Completar Pedido</div><button class="close" onclick="closeCheckout()">&times;</button></div>
+        <div class="modal-body">
+            <form id="checkoutForm" onsubmit="submitOrder(event)">
+                <div class="form-group"><label class="form-label" for="direccion">Dirección de Entrega *</label><input type="text" class="form-control" id="direccion" required></div>
+                <div class="form-row">
+                    <div class="form-group"><label class="form-label" for="ciudad">Ciudad *</label><input type="text" class="form-control" id="ciudad" required></div>
+                    <div class="form-group"><label class="form-label" for="codigoPostal">Código Postal *</label><input type="text" class="form-control" id="codigoPostal" pattern="[0-9]{5}" required></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label class="form-label" for="provincia">Provincia *</label><input type="text" class="form-control" id="provincia" required></div>
+                    <div class="form-group"><label class="form-label" for="pais">País</label><input type="text" class="form-control" id="pais" value="España"></div>
+                </div>
+                <div class="form-group"><label class="form-label" for="observaciones">Observaciones</label><textarea class="form-control" id="observaciones" placeholder="Ej: Timbre 2B, sin cebolla..."></textarea></div>
+                <button type="submit" class="btn btn-primary" style="width:100%">Confirmar Pedido</button>
+            </form>
+        </div>
+    </div>
+</div>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+    const API_URL='http://localhost:8080/api';
+    let cart=[],currentRestaurantId=null,currentFilter='all',allProducts=[],categories=[],userProfile=null;
+
+    async function fetchWithAuth(url,options={}){
+        const token=localStorage.getItem('token');
+        if(!token){window.location.href='login.html';return}
+        const headers={'Content-Type':'application/json','Authorization':`Bearer ${token}`,...options.headers};
+        return fetch(url,{...options,headers})
+    }
+
+    function checkAuth(){
+        const token=localStorage.getItem('token'),role=localStorage.getItem('role');
+        if(!token)window.location.href='login.html';
+        if(role==='ADMIN')window.location.href='admin.html';
+        const username=localStorage.getItem('username');
+        if(username){
+            document.getElementById('navUsername').textContent=username;
+            document.getElementById('dropdownUsername').textContent=username;
+            const initials=username.substring(0,2).toUpperCase();
+            document.getElementById('navAvatar').textContent=initials
+        }
+    }
+
+    function showSection(section){
+        document.querySelectorAll('.nav-btn').forEach(btn=>btn.classList.remove('active'));
+        const buttons=document.querySelectorAll('.nav-right .nav-btn');
+        buttons.forEach(btn=>{
+            const text=btn.textContent.toLowerCase();
+            if((section==='restaurants'&&text.includes('restaurantes'))||(section==='orders'&&text.includes('pedidos'))||(section==='profile'&&text.includes('perfil')))
+                btn.classList.add('active')
+        });
+        document.querySelectorAll('.section').forEach(sec=>sec.classList.remove('active'));
+        document.getElementById(`section-${section}`).classList.add('active');
+        if(section==='restaurants'){backToRestaurants();loadRestaurants()}
+        else if(section==='orders')loadOrders('all');
+        else if(section==='profile')loadProfile();
+        document.getElementById('userMenu').classList.remove('show')
+    }
+
+    async function loadRestaurants(){
+        const loader=document.getElementById('restaurantLoader'),grid=document.getElementById('restaurantGrid');
+        loader.style.display='block';grid.innerHTML='';
+        try{
+            const response=await fetchWithAuth(`${API_URL}/restaurantes?size=100`);
+            const data=await response.json();
+            loader.style.display='none';
+            const restaurants=data.content||[],activos=restaurants.filter(r=>r.activo!==false);
+            if(activos.length===0){grid.innerHTML='<div class="empty">No hay restaurantes disponibles</div>';return}
+            activos.forEach(restaurant=>{
+                const card=document.createElement('div');
+                card.className='card';
+                card.onclick=()=>viewRestaurantProducts(restaurant.id,restaurant.nombre);
+                card.innerHTML=`<img src="${restaurant.imagenUrl||'https://via.placeholder.com/400x200?text=Restaurante'}" class="card-img" alt="${restaurant.nombre}"><div class="card-body"><div class="card-title">${restaurant.nombre}</div><div class="card-desc">${restaurant.descripcion||''}</div><div style="margin-top:1rem"><div style="font-size:.85rem;color:var(--gray)">📍 ${restaurant.direccion}</div></div></div>`;
+                grid.appendChild(card)
+            })
+        }catch(error){console.error('Error:',error);loader.style.display='none';grid.innerHTML='<div class="empty">Error al cargar restaurantes</div>'}
+    }
+
+    async function viewRestaurantProducts(restaurantId,restaurantName){
+        currentRestaurantId=restaurantId;
+        document.getElementById('restaurantName').textContent=restaurantName;
+        document.getElementById('restaurantGrid').style.display='none';
+        document.getElementById('restaurantLoader').style.display='none';
+        document.getElementById('productsSection').classList.remove('hidden');
+
+        await loadProducts(restaurantId)
+    }
+
+    function backToRestaurants(){
+        currentRestaurantId=null;cart=[];updateCart();
+        document.getElementById('restaurantGrid').style.display='grid';
+        document.getElementById('productsSection').classList.add('hidden')
+    }
+
+
+
+    async function loadProducts(restaurantId){
+        const loader=document.getElementById('productLoader'),grid=document.getElementById('productGrid'),empty=document.getElementById('productEmpty');
+        loader.classList.remove('hidden');grid.innerHTML='';empty.classList.add('hidden');
+        try{
+            const response=await fetchWithAuth(`${API_URL}/productos/filtrar?restauranteId=${restaurantId}&size=100`);
+            const data=await response.json();
+            allProducts=data.content;
+            loader.classList.add('hidden');
+            displayProducts(allProducts)
+        }catch(error){console.error('Error:',error);loader.classList.add('hidden');empty.classList.remove('hidden')}
+    }
+
+
+
+    function displayProducts(products){
+        const grid=document.getElementById('productGrid'),empty=document.getElementById('productEmpty');
+        grid.innerHTML='';
+        const available=products.filter(p=>p.disponible);
+        if(available.length===0){empty.classList.remove('hidden');return}
+        empty.classList.add('hidden');
+        available.forEach(product=>{
+            const card=document.createElement('div');
+            card.className='card';
+            card.innerHTML=`<div style="position:relative"></div><div class="card-body"><div class="card-title">${product.nombre}</div><div class="card-desc">${product.descripcion||''}</div><div class="card-footer"><span class="price">€${product.precio}</span><button class="btn btn-primary" onclick='addToCart(${JSON.stringify(product).replace(/'/g,"&#39;")})'>Añadir</button></div></div>`;
+            grid.appendChild(card)
+        })
+    }
+
+    function addToCart(product){
+        const existing=cart.find(item=>item.id===product.id);
+        if(existing){
+            if(existing.cantidad<product.stock)existing.cantidad++;
+            else{alert(`Stock máximo disponible: ${product.stock}`);return}
+        }else cart.push({...product,cantidad:1});
+        updateCart()
+    }
+
+    function updateCart(){
+        const badge=document.getElementById('cartBadge'),empty=document.getElementById('cartEmpty'),items=document.getElementById('cartItems'),summary=document.getElementById('cartSummary'),total=document.getElementById('cartTotal');
+        const totalItems=cart.reduce((sum,item)=>sum+item.cantidad,0);
+        badge.textContent=totalItems;
+        if(cart.length===0){empty.style.display='block';items.classList.add('hidden');summary.classList.add('hidden');return}
+        empty.style.display='none';items.classList.remove('hidden');summary.classList.remove('hidden');
+        items.innerHTML='';let cartTotal=0;
+        cart.forEach((item,index)=>{
+            const subtotal=item.precio*item.cantidad;
+            cartTotal+=subtotal;
+            const div=document.createElement('div');
+            div.className='cart-item';
+            div.innerHTML=`<div class="cart-item-info"><span class="cart-item-name">${item.nombre}</span><span class="cart-item-price">€${subtotal.toFixed(2)}</span></div><div class="cart-qty"><button class="qty-btn" onclick="decreaseQty(${index})">−</button><span>${item.cantidad}</span><button class="qty-btn" onclick="increaseQty(${index})">+</button></div>`;
+            items.appendChild(div)
+        });
+        total.textContent=`€${cartTotal.toFixed(2)}`
+    }
+
+    function increaseQty(index){if(cart[index].cantidad<cart[index].stock){cart[index].cantidad++;updateCart()}else alert(`Stock máximo disponible: ${cart[index].stock}`)}
+    function decreaseQty(index){if(cart[index].cantidad>1)cart[index].cantidad--;else cart.splice(index,1);updateCart()}
+    function openCart(){document.getElementById('cartModal').classList.add('show')}
+    function closeCart(){document.getElementById('cartModal').classList.remove('show')}
+
+    function openCheckout(){
+        if(cart.length===0)return;
+        closeCart();
+        loadProfileDataForCheckout();
+        document.getElementById('checkoutModal').classList.add('show')
+    }
+    function closeCheckout(){document.getElementById('checkoutModal').classList.remove('show')}
+
+    async function loadProfileDataForCheckout(){
+        if(userProfile){
+            if(userProfile.direccion)document.getElementById('direccion').value=userProfile.direccion;
+            if(userProfile.ciudad)document.getElementById('ciudad').value=userProfile.ciudad;
+            if(userProfile.codigoPostal)document.getElementById('codigoPostal').value=userProfile.codigoPostal;
+            if(userProfile.provincia)document.getElementById('provincia').value=userProfile.provincia;
+            return
+        }
+        try{
+            const response=await fetchWithAuth(`${API_URL}/clientes/mi-perfil`);
+            if(response.ok){
+                const data=await response.json();
+                userProfile=data;
+                if(data.direccion)document.getElementById('direccion').value=data.direccion;
+                if(data.ciudad)document.getElementById('ciudad').value=data.ciudad;
+                if(data.codigoPostal)document.getElementById('codigoPostal').value=data.codigoPostal;
+                if(data.provincia)document.getElementById('provincia').value=data.provincia
+            }
+        }catch(error){console.log('No se pudo precargar datos del perfil')}
+    }
+
+    async function submitOrder(e){
+        e.preventDefault();
+        const pedidoData={
+            direccionEntrega:document.getElementById('direccion').value,
+            ciudadEntrega:document.getElementById('ciudad').value,
+            codigoPostalEntrega:document.getElementById('codigoPostal').value,
+            provinciaEntrega:document.getElementById('provincia').value,
+            paisEntrega:document.getElementById('pais').value||'España',
+            observaciones:document.getElementById('observaciones').value||null,
+            detalles:cart.map(item=>({productoId:item.id,cantidad:item.cantidad}))
+        };
+        try{
+            const response=await fetchWithAuth(`${API_URL}/pedidos`,{method:'POST',body:JSON.stringify(pedidoData)});
+            if(response.ok){
+                const pedido=await response.json();
+                closeCheckout();
+                alert(`¡Pedido realizado con éxito!\n\nNúmero: #${pedido.id}\nTotal: €${pedido.total}\n\nEstado: ${formatStatus(pedido.estado)}`);
+                cart=[];currentRestaurantId=null;updateCart();document.getElementById('checkoutForm').reset();userProfile=null;showSection('orders')
+            }else{
+                const error=await response.json();
+                alert(`Error: ${error.message||'No se pudo realizar el pedido'}`)
+            }
+        }catch(error){console.error('Error:',error);alert('Error de conexión con el servidor')}
+    }
+
+    async function loadProfile(){
+        const loader=document.getElementById('profileLoader'),card=document.getElementById('profileCard'),errorDiv=document.getElementById('profileError');
+        loader.style.display='block';card.classList.add('hidden');errorDiv.classList.add('hidden');
+
+        try{
+            const response=await fetchWithAuth(`${API_URL}/clientes/mi-perfil`);
+            console.log('Response status:', response.status);
+
+            // Verificar si la respuesta está vacía
+            const contentType = response.headers.get("content-type");
+            console.log('Content-Type:', contentType);
+
+            if(!response.ok){
+                if(response.status === 404){
+                    throw new Error('Perfil no encontrado. Por favor, contacta con el administrador para que verifique tu cuenta.')
+                }
+                throw new Error(`Error ${response.status}: No se pudo cargar el perfil`)
+            }
+
+            // Intentar parsear JSON solo si hay contenido
+            const text = await response.text();
+            console.log('Response text:', text);
+
+            if(!text || text.trim() === ''){
+                throw new Error('El servidor devolvió una respuesta vacía. Por favor, contacta con el administrador.')
+            }
+
+            const data = JSON.parse(text);
+            userProfile=data;
+
+            loader.style.display='none';
+            card.classList.remove('hidden');
+
+            if(data.email)document.getElementById('dropdownEmail').textContent=data.email;
+            const initials=((data.nombre||'U')[0]+(data.apellidos||'U')[0]).toUpperCase();
+            document.getElementById('profileAvatar').textContent=initials;
+            document.getElementById('profileName').textContent=`${data.nombre||''} ${data.apellidos||''}`.trim()||'Usuario';
+            document.getElementById('profileEmail').textContent=data.email||'-';
+            document.getElementById('profilePhone').textContent=data.telefono||'-';
+            document.getElementById('profileAddress').textContent=data.direccion||'-';
+            document.getElementById('profileCity').textContent=data.ciudad||'-';
+            document.getElementById('profilePostalCode').textContent=data.codigoPostal||'-';
+            document.getElementById('profileProvince').textContent=data.provincia||'-'
+        }catch(error){
+            console.error('Error detallado al cargar perfil:',error);
+            loader.style.display='none';
+            errorDiv.innerHTML=`<div class="alert alert-warning"><strong>⚠️ No se pudo cargar el perfil</strong><br><br>${error.message}<br><br><strong>Posibles soluciones:</strong><br>1. Cierra sesión y vuelve a iniciar sesión<br>2. Si el problema persiste, contacta con el administrador<br>3. Tu cuenta puede necesitar configuración adicional</div>`;
+            errorDiv.classList.remove('hidden')
+        }
+    }
+
+    async function loadOrders(filter='all'){
+        currentFilter=filter;
+        const loader=document.getElementById('orderLoader'),container=document.getElementById('orderContainer');
+        loader.style.display='block';container.innerHTML='';
+        try{
+            const response=await fetchWithAuth(`${API_URL}/pedidos/mis-pedidos?size=100`);
+            const data=await response.json();
+            loader.style.display='none';
+            let orders=data.content;
+            if(filter!=='all')orders=orders.filter(order=>order.estado===filter);
+            if(orders.length===0){container.innerHTML='<div class="empty">No hay pedidos para mostrar</div>';return}
+            orders.forEach(order=>{
+                const card=document.createElement('div');
+                card.className='order-card';
+                const statusClass=`status-${order.estado.toLowerCase()}`;
+                card.innerHTML=`<div class="order-header"><div class="order-number">Pedido #${order.id}</div><div class="order-status ${statusClass}">${formatStatus(order.estado)}</div></div><div class="order-details"><div class="order-detail-row"><span class="order-detail-label">Fecha:</span><span>${order.fechaPedido}</span></div><div class="order-detail-row"><span class="order-detail-label">Cliente:</span><span>${order.clienteNombre}</span></div></div><div class="order-total"><span>Total:</span><span>€${order.total}</span></div>`;
+                container.appendChild(card)
+            })
+        }catch(error){console.error('Error:',error);loader.style.display='none';alert('Error al cargar los pedidos')}
+    }
+
+    function filterOrders(filter){document.querySelectorAll('#section-orders .filter-btn').forEach(btn=>btn.classList.remove('active'));event.target.classList.add('active');loadOrders(filter)}
+    function formatStatus(status){const statuses={'PENDIENTE':'Pendiente','EN_PREPARACION':'En Preparación','EN_CAMINO':'En Camino','ENTREGADO':'Entregado','CANCELADO':'Cancelado'};return statuses[status]||status}
+    function toggleUserMenu(){document.getElementById('userMenu').classList.toggle('show')}
+    function logout(){if(confirm('¿Cerrar sesión?')){localStorage.clear();window.location.href='login.html'}}
+    window.onclick=e=>{if(!e.target.matches('.user-btn')&&!e.target.closest('.user-menu'))document.getElementById('userMenu').classList.remove('show')}
+    checkAuth();loadRestaurants()
+</script>
+
+</body>
+
+</html>

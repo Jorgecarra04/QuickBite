@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickBite - Iniciar Sesión</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary:#ff6b35;
+            --secondary:#0f172a;
+            --bg:#f4f6f9;
+            --white:#ffffff;
+            --gray:#6b7280;
+            --border:#e5e7eb;
+            --shadow:0 10px 25px rgba(0,0,0,0.08);
+        }
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+        }
+
+        body{
+            font-family:'Outfit',sans-serif;
+            background:linear-gradient(135deg,#0f172a,#1e293b);
+            min-height:100vh;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+        }
+
+        .container{
+            background:var(--white);
+            width:100%;
+            max-width:420px;
+            border-radius:18px;
+            box-shadow:var(--shadow);
+            overflow:hidden;
+            animation:fadeUp .5s ease;
+        }
+
+        @keyframes fadeUp{
+            from{opacity:0;transform:translateY(30px);}
+            to{opacity:1;transform:translateY(0);}
+        }
+
+        .header{
+            padding:2.5rem 2rem;
+            text-align:center;
+            background:linear-gradient(135deg,var(--primary),#ff8c5a);
+            color:white;
+        }
+
+        .brand{
+            font-size:2.5rem;
+            font-weight:700;
+        }
+
+        .header p{
+            opacity:.9;
+            margin-top:.3rem;
+        }
+
+        .form-container{
+            padding:2.5rem;
+        }
+
+        .form-group{
+            margin-bottom:1.4rem;
+        }
+
+        .form-label{
+            font-weight:600;
+            font-size:.9rem;
+            margin-bottom:.4rem;
+            display:block;
+        }
+
+        .form-input{
+            width:100%;
+            padding:.9rem 1rem;
+            border:1px solid var(--border);
+            border-radius:10px;
+            font-size:1rem;
+            transition:.2s;
+        }
+
+        .form-input:focus{
+            outline:none;
+            border-color:var(--primary);
+            box-shadow:0 0 0 3px rgba(255,107,53,.15);
+        }
+
+        .btn-submit{
+            width:100%;
+            padding:1rem;
+            border:none;
+            border-radius:12px;
+            background:var(--primary);
+            color:white;
+            font-size:1.05rem;
+            font-weight:600;
+            cursor:pointer;
+            transition:.2s;
+        }
+
+        .btn-submit:hover{
+            background:#e85b2a;
+        }
+
+        .btn-submit:disabled{
+            background:var(--gray);
+            cursor:not-allowed;
+        }
+
+        .alert{
+            padding:.9rem 1rem;
+            border-radius:10px;
+            margin-bottom:1rem;
+            display:none;
+            font-size:.9rem;
+        }
+
+        .alert-success{
+            background:#d1fae5;
+            color:#065f46;
+        }
+
+        .alert-error{
+            background:#fee2e2;
+            color:#991b1b;
+        }
+
+        .loader{
+            display:none;
+            width:36px;
+            height:36px;
+            border:4px solid #eee;
+            border-top:4px solid var(--primary);
+            border-radius:50%;
+            animation:spin 1s linear infinite;
+            margin:0 auto 1rem;
+        }
+
+        @keyframes spin{
+            to{transform:rotate(360deg);}
+        }
+
+        .link-section{
+            text-align:center;
+            margin-top:1.5rem;
+            border-top:1px solid var(--border);
+            padding-top:1rem;
+        }
+
+        .link-section p{
+            color:var(--gray);
+            font-size:.9rem;
+        }
+
+        .link-section a{
+            color:var(--primary);
+            text-decoration:none;
+            font-weight:600;
+        }
+
+        .link-section a:hover{
+            text-decoration:underline;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+    <div class="header">
+        <div class="brand">QuickBite</div>
+        <p>Tu comida favorita a un click</p>
+    </div>
+
+    <div class="form-container">
+        <div id="alert" class="alert"></div>
+        <div class="loader" id="loader"></div>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <label class="form-label" for="username">Usuario</label>
+                <input type="text" class="form-input" id="username" name="username" required autocomplete="username">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="password">Contraseña</label>
+                <input type="password" class="form-input" id="password" name="password" required autocomplete="current-password">
+            </div>
+
+            <button type="submit" class="btn-submit">Iniciar sesión</button>
+        </form>
+
+        <div class="link-section">
+            <p>¿No tienes cuenta?</p>
+            <a href="register.html">Regístrate aquí</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API_URL = 'http://localhost:8080/api';
+
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value;
+        const loader = document.getElementById('loader');
+        const alert = document.getElementById('alert');
+        const btn = document.querySelector('.btn-submit');
+
+        loader.style.display = 'block';
+        btn.disabled = true;
+        alert.style.display = 'none';
+
+        try {
+            const response = await fetch(`${API_URL}/auth/login`, {
+                method: 'POST',
+                headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({ username, password })
+            });
+
+            const data = await response.json();
+
+            if(response.ok){
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('username', data.username);
+                localStorage.setItem('role', data.role);
+
+                showAlert('success','Login correcto, redirigiendo...');
+
+                setTimeout(()=>{
+                    if(data.role === 'ADMIN'){
+                        window.location.href = 'admin.html';
+                    } else {
+                        window.location.href = 'index.html';
+                    }
+                },1000);
+            } else {
+                showAlert('error', data.message || 'Error al iniciar sesión');
+            }
+        } catch {
+            showAlert('error','Error de conexión con el servidor');
+        } finally {
+            loader.style.display='none';
+            btn.disabled=false;
+        }
+    });
+
+    function showAlert(type,message){
+        const alert=document.getElementById('alert');
+        alert.className=`alert alert-${type}`;
+        alert.textContent=message;
+        alert.style.display='block';
+    }
+
+    if(localStorage.getItem('token')){
+        const role=localStorage.getItem('role');
+        if(role==='ADMIN'){
+            window.location.href='admin.html';
+        } else {
+            window.location.href='index.html';
+        }
+    }
+</script>
+
+</body>
+</html>

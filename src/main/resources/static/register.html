@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickBite - Registro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root{
+            --primary:#ff6b35;
+            --secondary:#0f172a;
+            --bg:#f4f6f9;
+            --white:#ffffff;
+            --gray:#6b7280;
+            --border:#e5e7eb;
+            --shadow:0 10px 25px rgba(0,0,0,0.08);
+            --success:#d1fae5;
+            --danger:#fee2e2;
+        }
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+        }
+
+        body{
+            font-family:'Outfit',sans-serif;
+            background:linear-gradient(135deg,#0f172a,#1e293b);
+            min-height:100vh;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            padding:20px;
+        }
+
+        .container{
+            background:var(--white);
+            width:100%;
+            max-width:520px;
+            border-radius:18px;
+            box-shadow:var(--shadow);
+            overflow:hidden;
+            animation:fadeUp .5s ease;
+        }
+
+        @keyframes fadeUp{
+            from{opacity:0;transform:translateY(30px);}
+            to{opacity:1;transform:translateY(0);}
+        }
+
+        .header{
+            background:linear-gradient(135deg,var(--primary),#ff8c5a);
+            color:white;
+            padding:2.5rem 2rem;
+            text-align:center;
+        }
+
+        .brand{
+            font-size:2.5rem;
+            font-weight:700;
+        }
+
+        .header p{
+            opacity:.9;
+            margin-top:.3rem;
+        }
+
+        .form-container{
+            padding:2.5rem;
+        }
+
+        .alert{
+            padding:.9rem 1rem;
+            border-radius:10px;
+            margin-bottom:1rem;
+            display:none;
+            font-size:.9rem;
+        }
+
+        .alert-success{
+            background:var(--success);
+            color:#065f46;
+        }
+
+        .alert-error{
+            background:var(--danger);
+            color:#991b1b;
+        }
+
+        .form-row{
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:1rem;
+        }
+
+        .form-group{
+            margin-bottom:1.4rem;
+        }
+
+        .form-label{
+            font-weight:600;
+            font-size:.9rem;
+            margin-bottom:.4rem;
+            display:block;
+        }
+
+        .form-input{
+            width:100%;
+            padding:.9rem 1rem;
+            border:1px solid var(--border);
+            border-radius:10px;
+            font-size:1rem;
+            transition:.2s;
+        }
+
+        .form-input:focus{
+            outline:none;
+            border-color:var(--primary);
+            box-shadow:0 0 0 3px rgba(255,107,53,.15);
+        }
+
+        .btn-submit{
+            width:100%;
+            padding:1rem;
+            border:none;
+            border-radius:12px;
+            background:var(--primary);
+            color:white;
+            font-size:1.05rem;
+            font-weight:600;
+            cursor:pointer;
+            transition:.2s;
+            margin-top:.5rem;
+        }
+
+        .btn-submit:hover{
+            background:#e85b2a;
+        }
+
+        .btn-submit:disabled{
+            background:var(--gray);
+            cursor:not-allowed;
+        }
+
+        .loader{
+            display:none;
+            width:36px;
+            height:36px;
+            border:4px solid #eee;
+            border-top:4px solid var(--primary);
+            border-radius:50%;
+            animation:spin 1s linear infinite;
+            margin:0 auto 1rem;
+        }
+
+        @keyframes spin{
+            to{transform:rotate(360deg);}
+        }
+
+        .link-section{
+            text-align:center;
+            margin-top:1.5rem;
+            border-top:1px solid var(--border);
+            padding-top:1rem;
+        }
+
+        .link-section p{
+            color:var(--gray);
+            font-size:.9rem;
+        }
+
+        .link-section a{
+            color:var(--primary);
+            text-decoration:none;
+            font-weight:600;
+        }
+
+        .link-section a:hover{
+            text-decoration:underline;
+        }
+
+        @media(max-width:600px){
+            .form-row{
+                grid-template-columns:1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+    <div class="header">
+        <div class="brand">QuickBite</div>
+        <p>Crea tu cuenta</p>
+    </div>
+
+    <div class="form-container">
+        <div id="alert" class="alert"></div>
+        <div class="loader" id="loader"></div>
+
+        <form id="registerForm">
+            <div class="form-group">
+                <label class="form-label" for="username">Usuario *</label>
+                <input type="text" class="form-input" id="username" name="username" required minlength="3" autocomplete="username">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="email">Email *</label>
+                <input type="email" class="form-input" id="email" name="email" required autocomplete="email">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label" for="nombre">Nombre</label>
+                    <input type="text" class="form-input" id="nombre" name="nombre" autocomplete="given-name">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="apellidos">Apellidos</label>
+                    <input type="text" class="form-input" id="apellidos" name="apellidos" autocomplete="family-name">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="telefono">Teléfono</label>
+                <input type="tel" class="form-input" id="telefono" name="telefono" pattern="[0-9]{9}" placeholder="Ej: 612345678" autocomplete="tel">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="password">Contraseña *</label>
+                <input type="password" class="form-input" id="password" name="password" required minlength="6" autocomplete="new-password">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="confirmPassword">Confirmar Contraseña *</label>
+                <input type="password" class="form-input" id="confirmPassword" name="confirmPassword" required autocomplete="new-password">
+            </div>
+
+            <button type="submit" class="btn-submit">Crear cuenta</button>
+        </form>
+
+        <div class="link-section">
+            <p>¿Ya tienes cuenta?</p>
+            <a href="login.html">Inicia sesión</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API_URL = 'http://localhost:8080/api';
+
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const username = document.getElementById('username').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const nombre = document.getElementById('nombre').value.trim();
+        const apellidos = document.getElementById('apellidos').value.trim();
+        const telefono = document.getElementById('telefono').value.trim();
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+
+        if (password !== confirmPassword) {
+            showAlert('error', 'Las contraseñas no coinciden');
+            return;
+        }
+
+        const loader = document.getElementById('loader');
+        const alert = document.getElementById('alert');
+        const btn = document.querySelector('.btn-submit');
+
+        loader.style.display = 'block';
+        btn.disabled = true;
+        alert.style.display = 'none';
+
+        try {
+            const response = await fetch(`${API_URL}/auth/register`, {
+                method: 'POST',
+                headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({
+                    username,
+                    email,
+                    nombre: nombre || null,
+                    apellidos: apellidos || null,
+                    telefono: telefono || null,
+                    password
+                })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('username', data.username);
+                localStorage.setItem('role', data.role);
+
+                showAlert('success', 'Registro correcto, redirigiendo...');
+
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 1500);
+            } else {
+                if (data.errors) {
+                    const errorMessages = Object.values(data.errors).join(', ');
+                    showAlert('error', errorMessages);
+                } else {
+                    showAlert('error', data.message || 'Error al registrarse');
+                }
+            }
+        } catch {
+            showAlert('error', 'No se pudo conectar con el servidor');
+        } finally {
+            loader.style.display = 'none';
+            btn.disabled = false;
+        }
+    });
+
+    function showAlert(type, message){
+        const alert=document.getElementById('alert');
+        alert.className=`alert alert-${type}`;
+        alert.textContent=message;
+        alert.style.display='block';
+    }
+
+    if(localStorage.getItem('token')){
+        window.location.href='index.html';
+    }
+</script>
+
+</body>
+</html>
