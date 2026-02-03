@@ -861,50 +861,6 @@ Content-Type: application/json
 
 ---
 
-## 🎬 Video de Demostración
-
-### Estructura del Video (5 minutos)
-
-#### 1. Presentación (30 segundos)
-> "Hola, soy [Tu Nombre], y presento **QuickBite**, una API REST de delivery de comida desarrollada con Spring Boot."
-
-#### 2. Demostración en Postman (3 minutos)
-
-**A. Registro y Login (30 seg)**
-- POST /api/auth/register → Mostrar 201 Created
-- POST /api/auth/login → Mostrar token JWT
-
-**B. Paginación (30 seg)**
-- GET /api/productos?page=0&size=5 → Mostrar `content`, `totalPages`, `totalElements`
-
-**C. Creación de Pedido (30 seg)**
-- POST /api/pedidos → Mostrar 201 Created con detalles
-
-**D. Regla de Negocio (30 seg)**
-- Intentar crear pedido con productos de diferentes restaurantes
-- Mostrar error 400 con mensaje claro
-
-**E. Actualización de Stock (30 seg)**
-- PATCH /api/productos/{id}/stock → Mostrar actualización
-
-**F. Filtros (30 seg)**
-- GET /api/productos/filtrar?restauranteId=1&disponible=true
-
-#### 3. Verificación en Base de Datos (1 min)
-> "Ahora verifico la persistencia en MariaDB..."
-
-```sql
-SELECT * FROM usuarios;
-SELECT * FROM pedidos ORDER BY fecha_pedido DESC LIMIT 5;
-SELECT * FROM detalle_pedido;
-SELECT * FROM productos;
-```
-
-#### 4. Cierre (30 seg)
-> "Como pueden ver, el proyecto implementa todas las funcionalidades requeridas: modelo de datos completo, relaciones 1:N y N:M, paginación, reglas de negocio robustas y consultas avanzadas. ¡Gracias!"
-
----
-
 ## 📝 Notas Técnicas
 
 ### Optimizaciones Implementadas
@@ -986,11 +942,10 @@ graph LR
 
 ## 👨‍💻 Autor
 
-**Tu Nombre**
-- 📧 Email: tu.email@example.com
+**JORGE CARRAMOLINO VELA**
+- 📧 Email: jorgecarra04@gmail.com
 - 🎓 2º Desarrollo de Aplicaciones Multiplataforma
 - 📅 Proyecto Final - Acceso a Datos
-- 📆 Fecha: Febrero 2026
 
 ---
 
