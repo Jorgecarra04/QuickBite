@@ -15,7 +15,7 @@ import java.util.Optional;
 @Repository
 public interface ClienteRepository extends JpaRepository<Cliente, Long> {
 
-    // OPTIMIZADO: Carga clientes con usuario en una sola consulta
+    // Carga clientes con usuario en una sola consulta
     @EntityGraph(attributePaths = {"usuario"})
     Page<Cliente> findAll(Pageable pageable);
 

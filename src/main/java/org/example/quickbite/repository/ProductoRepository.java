@@ -14,7 +14,7 @@ import java.util.Optional;
 @Repository
 public interface ProductoRepository extends JpaRepository<Producto, Long> {
 
-    // OPTIMIZADO: Carga productos con restaurante y categoría en una sola consulta
+    // Carga productos con restaurante y categoría en una sola consulta
     @EntityGraph(attributePaths = {"restaurante", "categoria"})
     Page<Producto> findAll(Pageable pageable);
 

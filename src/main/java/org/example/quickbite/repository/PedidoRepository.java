@@ -12,7 +12,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface PedidoRepository extends JpaRepository<Pedido, Long> {
 
-    // OPTIMIZADO: Carga pedidos con cliente y usuario en una sola consulta
+    // Carga pedidos con cliente y usuario en una sola consulta
     @EntityGraph(attributePaths = {"cliente", "cliente.usuario", "repartidor"})
     Page<Pedido> findAll(Pageable pageable);
 

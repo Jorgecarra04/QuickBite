@@ -48,10 +48,10 @@ public class SecurityConfig {
                                 "/favicon.ico"
                         ).permitAll()
 
-                        // ✅ USUARIOS pueden ver su propio perfil
+                        // USUARIOS pueden ver su propio perfil
                         .requestMatchers("/api/clientes/mi-perfil").hasAnyRole("USER", "ADMIN")
 
-                        // 🔒 SOLO ADMIN puede gestionar clientes y repartidores
+                        // SOLO ADMIN puede gestionar clientes y repartidores
                         .requestMatchers("/api/clientes/**").hasRole("ADMIN")
                         .requestMatchers("/api/repartidores/**").hasRole("ADMIN")
 
