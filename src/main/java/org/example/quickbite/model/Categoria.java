@@ -1,5 +1,6 @@
 package org.example.quickbite.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -25,7 +26,7 @@ public class Categoria {
     @Column(length = 500)
     private String descripcion;
 
-    // Relación 1:N con Producto
     @OneToMany(mappedBy = "categoria", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Producto> productos = new ArrayList<>();
 }

@@ -98,7 +98,7 @@
 
         .stats{
             display:grid;
-            grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+            grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
             gap:1.5rem;
             margin-bottom:2rem;
         }
@@ -434,6 +434,10 @@
             <div class="stat-label">Restaurantes</div>
         </div>
         <div class="stat-card">
+            <div class="stat-value" id="stat-categorias">0</div>
+            <div class="stat-label">Categorías</div>
+        </div>
+        <div class="stat-card">
             <div class="stat-value" id="stat-productos">0</div>
             <div class="stat-label">Productos</div>
         </div>
@@ -454,6 +458,7 @@
     <!-- TABS -->
     <div class="tabs">
         <button class="tab-btn active" onclick="switchTab('restaurantes')">Restaurantes</button>
+        <button class="tab-btn" onclick="switchTab('categorias')">Categorías</button>
         <button class="tab-btn" onclick="switchTab('productos')">Productos</button>
         <button class="tab-btn" onclick="switchTab('pedidos')">Pedidos</button>
         <button class="tab-btn" onclick="switchTab('clientes')">Clientes</button>
@@ -484,6 +489,29 @@
         </div>
     </div>
 
+    <!-- TAB: CATEGORÍAS -->
+    <div id="tab-categorias" class="tab-content">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">Categorías de Productos</div>
+                <button class="btn btn-primary" onclick="openCategoriaModal()">+ Nueva Categoría</button>
+            </div>
+            <div id="loader-categorias" class="loader">Cargando...</div>
+            <table id="table-categorias" class="hidden">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Descripción</th>
+                    <th>Productos</th>
+                    <th>Acciones</th>
+                </tr>
+                </thead>
+                <tbody id="tbody-categorias"></tbody>
+            </table>
+        </div>
+    </div>
+
     <!-- TAB: PRODUCTOS -->
     <div id="tab-productos" class="tab-content">
         <div class="card">
@@ -494,6 +522,9 @@
             <div class="filters">
                 <select class="filter-select" id="filter-restaurante" onchange="loadProductos()">
                     <option value="">Todos los restaurantes</option>
+                </select>
+                <select class="filter-select" id="filter-categoria" onchange="loadProductos()">
+                    <option value="">Todas las categorías</option>
                 </select>
                 <select class="filter-select" id="filter-disponible" onchange="loadProductos()">
                     <option value="">Todos los estados</option>
@@ -508,6 +539,7 @@
                     <th>ID</th>
                     <th>Nombre</th>
                     <th>Restaurante</th>
+                    <th>Categoría</th>
                     <th>Precio</th>
                     <th>Stock</th>
                     <th>Estado</th>
@@ -614,7 +646,7 @@
     <div class="modal-content">
         <div class="modal-header">
             <div class="modal-title" id="restauranteModalTitle">Nuevo Restaurante</div>
-            <button class="close" onclick="closeRestauranteModal()">&times;</button>
+            <button class="close" onclick="closeRestauranteModal()">✕</button>
         </div>
         <div class="modal-body">
             <div id="restauranteAlert" class="alert"></div>
@@ -625,31 +657,55 @@
                     <input type="text" class="form-control" id="restauranteNombre" required>
                 </div>
                 <div class="form-group">
-                    <label class="form-label" for="restauranteDescripcion">Descripción *</label>
-                    <textarea class="form-control" id="restauranteDescripcion" required></textarea>
+                    <label class="form-label" for="restauranteDescripcion">Descripción</label>
+                    <textarea class="form-control" id="restauranteDescripcion"></textarea>
                 </div>
                 <div class="form-group">
                     <label class="form-label" for="restauranteDireccion">Dirección *</label>
                     <input type="text" class="form-control" id="restauranteDireccion" required>
                 </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label" for="restauranteTelefono">Teléfono *</label>
-                        <input type="tel" class="form-control" id="restauranteTelefono" pattern="[0-9]{9}" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="restauranteActivo">Estado</label>
-                        <select class="form-control" id="restauranteActivo">
-                            <option value="true">Activo</option>
-                            <option value="false">Inactivo</option>
-                        </select>
-                    </div>
+                <div class="form-group">
+                    <label class="form-label" for="restauranteTelefono">Teléfono *</label>
+                    <input type="tel" class="form-control" id="restauranteTelefono" pattern="[0-9]{9}" required>
                 </div>
                 <div class="form-group">
-                    <label class="form-label" for="restauranteImagenUrl">URL Imagen</label>
+                    <label class="form-label" for="restauranteImagenUrl">URL de Imagen</label>
                     <input type="url" class="form-control" id="restauranteImagenUrl">
                 </div>
-                <button type="submit" class="btn btn-primary" style="width:100%">Guardar</button>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeRestauranteModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: CATEGORÍA -->
+<div id="categoriaModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <div class="modal-title" id="categoriaModalTitle">Nueva Categoría</div>
+            <button class="close" onclick="closeCategoriaModal()">✕</button>
+        </div>
+        <div class="modal-body">
+            <div id="categoriaAlert" class="alert"></div>
+            <form id="categoriaForm" onsubmit="submitCategoria(event)">
+                <input type="hidden" id="categoriaId">
+                <div class="form-group">
+                    <label class="form-label" for="categoriaNombre">Nombre *</label>
+                    <input type="text" class="form-control" id="categoriaNombre" required maxlength="50">
+                    <small style="color:var(--gray);font-size:.85rem;">Ej: Pizzas, Hamburguesas, Postres, Bebidas</small>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="categoriaDescripcion">Descripción</label>
+                    <textarea class="form-control" id="categoriaDescripcion" maxlength="200"></textarea>
+                    <small style="color:var(--gray);font-size:.85rem;">Descripción opcional de la categoría</small>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeCategoriaModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
             </form>
         </div>
     </div>
@@ -660,7 +716,7 @@
     <div class="modal-content">
         <div class="modal-header">
             <div class="modal-title" id="productoModalTitle">Nuevo Producto</div>
-            <button class="close" onclick="closeProductoModal()">&times;</button>
+            <button class="close" onclick="closeProductoModal()">✕</button>
         </div>
         <div class="modal-body">
             <div id="productoAlert" class="alert"></div>
@@ -677,28 +733,68 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label class="form-label" for="productoPrecio">Precio (€) *</label>
-                        <input type="number" step="0.01" min="0.01" class="form-control" id="productoPrecio" required>
+                        <input type="number" class="form-control" id="productoPrecio" step="0.01" min="0.01" required>
                     </div>
                     <div class="form-group">
                         <label class="form-label" for="productoStock">Stock *</label>
-                        <input type="number" min="0" class="form-control" id="productoStock" required>
+                        <input type="number" class="form-control" id="productoStock" min="0" required>
                     </div>
                 </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label" for="productoRestaurante">Restaurante *</label>
-                        <select class="form-control" id="productoRestaurante" required></select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="productoDisponible">Disponible</label>
-                        <select class="form-control" id="productoDisponible">
-                            <option value="true">Sí</option>
-                            <option value="false">No</option>
-                        </select>
-                    </div>
+                <div class="form-group">
+                    <label class="form-label" for="productoRestaurante">Restaurante *</label>
+                    <select class="form-control" id="productoRestaurante" required>
+                        <option value="">Seleccionar restaurante</option>
+                    </select>
                 </div>
-                <button type="submit" class="btn btn-primary" style="width:100%">Guardar</button>
+                <div class="form-group">
+                    <label class="form-label" for="productoCategoria">Categoría *</label>
+                    <select class="form-control" id="productoCategoria" required>
+                        <option value="">Seleccionar categoría</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label style="display:flex;align-items:center;gap:.5rem;">
+                        <input type="checkbox" id="productoDisponible" checked>
+                        <span class="form-label" style="margin:0;">Disponible</span>
+                    </label>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeProductoModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
             </form>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: PEDIDO DETALLE -->
+<div id="pedidoModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <div class="modal-title">Detalle del Pedido</div>
+            <button class="close" onclick="closePedidoModal()">✕</button>
+        </div>
+        <div class="modal-body">
+            <div id="pedidoDetalle"></div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closePedidoModal()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: CLIENTE DETALLE -->
+<div id="clienteModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <div class="modal-title">Detalle del Cliente</div>
+            <button class="close" onclick="closeClienteModal()">✕</button>
+        </div>
+        <div class="modal-body">
+            <div id="clienteDetalle"></div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeClienteModal()">Cerrar</button>
+            </div>
         </div>
     </div>
 </div>
@@ -708,7 +804,7 @@
     <div class="modal-content">
         <div class="modal-header">
             <div class="modal-title" id="repartidorModalTitle">Nuevo Repartidor</div>
-            <button class="close" onclick="closeRepartidorModal()">&times;</button>
+            <button class="close" onclick="closeRepartidorModal()">✕</button>
         </div>
         <div class="modal-body">
             <div id="repartidorAlert" class="alert"></div>
@@ -728,128 +824,37 @@
                     <label class="form-label" for="repartidorEmail">Email *</label>
                     <input type="email" class="form-control" id="repartidorEmail" required>
                 </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label" for="repartidorTelefono">Teléfono *</label>
-                        <input type="tel" class="form-control" id="repartidorTelefono" pattern="[0-9]{9}" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="repartidorMatricula">Matrícula *</label>
-                        <input type="text" class="form-control" id="repartidorMatricula" pattern="[0-9]{4}[A-Z]{3}" placeholder="1234ABC" required>
-                    </div>
-                </div>
-                <button type="submit" class="btn btn-primary" style="width:100%">Guardar</button>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- MODAL: VER PEDIDO -->
-<div id="pedidoModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <div class="modal-title">Detalle del Pedido</div>
-            <button class="close" onclick="closePedidoModal()">&times;</button>
-        </div>
-        <div class="modal-body">
-            <div id="pedidoDetalle"></div>
-        </div>
-    </div>
-</div>
-
-<!-- MODAL: CAMBIAR ESTADO PEDIDO -->
-<div id="pedidoEstadoModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <div class="modal-title">Cambiar Estado del Pedido</div>
-            <button class="close" onclick="closePedidoEstadoModal()">&times;</button>
-        </div>
-        <div class="modal-body">
-            <div id="pedidoEstadoAlert" class="alert"></div>
-            <form id="pedidoEstadoForm" onsubmit="submitPedidoEstado(event)">
-                <input type="hidden" id="pedidoEstadoId">
                 <div class="form-group">
-                    <label class="form-label" for="pedidoNuevoEstado">Nuevo Estado</label>
-                    <select class="form-control" id="pedidoNuevoEstado" required>
-                        <option value="PENDIENTE">Pendiente</option>
-                        <option value="EN_PREPARACION">En Preparación</option>
-                        <option value="EN_CAMINO">En Camino</option>
-                        <option value="ENTREGADO">Entregado</option>
-                        <option value="CANCELADO">Cancelado</option>
-                    </select>
+                    <label class="form-label" for="repartidorTelefono">Teléfono *</label>
+                    <input type="tel" class="form-control" id="repartidorTelefono" pattern="[0-9]{9}" required>
                 </div>
-                <button type="submit" class="btn btn-primary" style="width:100%">Actualizar</button>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- MODAL: ASIGNAR REPARTIDOR -->
-<div id="asignarRepartidorModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <div class="modal-title">Asignar Repartidor</div>
-            <button class="close" onclick="closeAsignarRepartidorModal()">&times;</button>
-        </div>
-        <div class="modal-body">
-            <div id="asignarRepartidorAlert" class="alert"></div>
-            <form id="asignarRepartidorForm" onsubmit="submitAsignarRepartidor(event)">
-                <input type="hidden" id="asignarPedidoId">
                 <div class="form-group">
-                    <label class="form-label" for="asignarRepartidorSelect">Seleccionar Repartidor</label>
-                    <select class="form-control" id="asignarRepartidorSelect" required></select>
+                    <label class="form-label" for="repartidorMatricula">Matrícula Vehículo *</label>
+                    <input type="text" class="form-control" id="repartidorMatricula" pattern="[0-9]{4}[A-Z]{3}" placeholder="1234ABC" required>
                 </div>
-                <button type="submit" class="btn btn-primary" style="width:100%">Asignar</button>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeRepartidorModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
             </form>
         </div>
     </div>
 </div>
-
-<!-- MODAL: VER CLIENTE -->
-<div id="clienteModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <div class="modal-title">Detalle del Cliente</div>
-            <button class="close" onclick="closeClienteModal()">&times;</button>
-        </div>
-        <div class="modal-body">
-            <div id="clienteDetalle"></div>
-        </div>
-    </div>
-</div>
-
 
 <script>
     const API_URL = 'http://localhost:8080/api';
     let currentRestauranteId = null;
+    let currentCategoriaId = null;
     let currentProductoId = null;
     let currentRepartidorId = null;
 
-    // HELPER: Fetch con autenticación
-    async function fetchWithAuth(url, options = {}) {
-        const token = localStorage.getItem('token');
-        if (!token) {
-            window.location.href = 'login.html';
-            return;
-        }
-
-        const headers = {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-            ...options.headers
-        };
-
-        return fetch(url, { ...options, headers });
-    }
-
-    // VERIFICACIÓN DE AUTENTICACIÓN Y ROL
+    // AUTH
     function checkAuth() {
         const token = localStorage.getItem('token');
         const role = localStorage.getItem('role');
         const username = localStorage.getItem('username');
 
         if (!token || role !== 'ADMIN') {
-            alert('Acceso no autorizado');
             window.location.href = 'login.html';
             return;
         }
@@ -857,48 +862,48 @@
         document.getElementById('adminUsername').textContent = username;
     }
 
-    // CAMBIO DE TABS
-    function switchTab(tab) {
-        // Remover active de todos los tabs
+    async function fetchWithAuth(url, options = {}) {
+        const token = localStorage.getItem('token');
+        return fetch(url, {
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+                ...options.headers
+            }
+        });
+    }
+
+    // TABS
+    function switchTab(tabName) {
         document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
         document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
 
-        // Activar el tab seleccionado
         event.target.classList.add('active');
-        document.getElementById(`tab-${tab}`).classList.add('active');
+        document.getElementById(`tab-${tabName}`).classList.add('active');
 
-        // Cargar datos del tab
-        switch(tab) {
-            case 'restaurantes':
-                loadRestaurantes();
-                break;
-            case 'productos':
-                loadProductos();
-                break;
-            case 'pedidos':
-                loadPedidos();
-                break;
-            case 'clientes':
-                loadClientes();
-                break;
-            case 'repartidores':
-                loadRepartidores();
-                break;
-        }
+        if (tabName === 'restaurantes') loadRestaurantes();
+        if (tabName === 'categorias') loadCategorias();
+        if (tabName === 'productos') loadProductos();
+        if (tabName === 'pedidos') loadPedidos();
+        if (tabName === 'clientes') loadClientes();
+        if (tabName === 'repartidores') loadRepartidores();
     }
 
     // ESTADÍSTICAS
     async function loadStats() {
         try {
-            const [restaurantes, productos, pedidos, clientes, repartidores] = await Promise.all([
-                fetchWithAuth(`${API_URL}/restaurantes?size=1`).then(r => r.json()),
-                fetchWithAuth(`${API_URL}/productos?size=1`).then(r => r.json()),
-                fetchWithAuth(`${API_URL}/pedidos?size=1`).then(r => r.json()),
-                fetchWithAuth(`${API_URL}/clientes?size=1`).then(r => r.json()),
-                fetchWithAuth(`${API_URL}/repartidores?size=1`).then(r => r.json())
+            const [restaurantes, categorias, productos, pedidos, clientes, repartidores] = await Promise.all([
+                fetchWithAuth(`${API_URL}/restaurantes?size=1000`).then(r => r.json()),
+                fetchWithAuth(`${API_URL}/categorias`).then(r => r.json()),
+                fetchWithAuth(`${API_URL}/productos?size=1000`).then(r => r.json()),
+                fetchWithAuth(`${API_URL}/pedidos?size=1000`).then(r => r.json()),
+                fetchWithAuth(`${API_URL}/clientes?size=1000`).then(r => r.json()),
+                fetchWithAuth(`${API_URL}/repartidores?size=1000`).then(r => r.json())
             ]);
 
             document.getElementById('stat-restaurantes').textContent = restaurantes.totalElements || 0;
+            document.getElementById('stat-categorias').textContent = categorias.length || 0;
             document.getElementById('stat-productos').textContent = productos.totalElements || 0;
             document.getElementById('stat-pedidos').textContent = pedidos.totalElements || 0;
             document.getElementById('stat-clientes').textContent = clientes.totalElements || 0;
@@ -925,23 +930,16 @@
             table.classList.remove('hidden');
 
             tbody.innerHTML = '';
-            console.log('🍽️ DEBUG RESTAURANTES - Total:', data.content.length);
-            console.log('🍽️ Primer restaurante completo:', data.content[0]);
             data.content.forEach(item => {
-                console.log('🍽️ Restaurante:', {
-                    id: item.id,
-                    nombre: item.nombre,
-                    activo: item.activo,
-                    tipo_activo: typeof item.activo,
-                    activo_raw: JSON.stringify(item.activo)
-                });
                 const tr = document.createElement('tr');
+                // Si activo es null, lo tratamos como inactivo
+                const esActivo = item.activo === true || item.activo === 1 || item.activo === '1';
                 tr.innerHTML = `
                     <td><strong>#${item.id}</strong></td>
                     <td>${item.nombre}</td>
-                    <td>${item.direccion}</td>
-                    <td>${item.telefono || ''}</td>
-                    <td><span class="badge ${item.activo === true ? 'badge-success' : 'badge-danger'}">${item.activo === true ? 'Activo' : 'Inactivo'}</span></td>
+                    <td>${item.direccion || '-'}</td>
+                    <td>${item.telefono || '-'}</td>
+                    <td><span class="badge ${esActivo ? 'badge-success' : 'badge-danger'}">${esActivo ? 'Activo' : 'Inactivo'}</span></td>
                     <td>
                         <div class="actions">
                             <button class="btn btn-secondary" onclick="editRestaurante(${item.id})">Editar</button>
@@ -979,10 +977,9 @@
 
             document.getElementById('restauranteId').value = data.id;
             document.getElementById('restauranteNombre').value = data.nombre;
-            document.getElementById('restauranteDescripcion').value = data.descripcion;
+            document.getElementById('restauranteDescripcion').value = data.descripcion || '';
             document.getElementById('restauranteDireccion').value = data.direccion;
             document.getElementById('restauranteTelefono').value = data.telefono;
-            document.getElementById('restauranteActivo').value = data.activo.toString();
             document.getElementById('restauranteImagenUrl').value = data.imagenUrl || '';
         } catch (error) {
             console.error('Error:', error);
@@ -997,8 +994,8 @@
             descripcion: document.getElementById('restauranteDescripcion').value,
             direccion: document.getElementById('restauranteDireccion').value,
             telefono: document.getElementById('restauranteTelefono').value,
-            activo: document.getElementById('restauranteActivo').value === 'true',
-            imagenUrl: document.getElementById('restauranteImagenUrl').value || null
+            imagenUrl: document.getElementById('restauranteImagenUrl').value,
+            activo: true
         };
 
         try {
@@ -1035,7 +1032,7 @@
     }
 
     async function deleteRestaurante(id) {
-        if (!confirm('¿Eliminar este restaurante?')) return;
+        if (!confirm('¿Eliminar este restaurante? También se eliminarán todos sus productos.')) return;
 
         try {
             const response = await fetchWithAuth(`${API_URL}/restaurantes/${id}`, {
@@ -1046,6 +1043,140 @@
                 alert('Restaurante eliminado');
                 loadRestaurantes();
                 loadStats();
+                loadProductoSelects();
+            } else {
+                const error = await response.json();
+                alert(error.message || 'Error al eliminar');
+            }
+        } catch (error) {
+            alert('Error de conexión');
+        }
+    }
+
+    // ===== CATEGORÍAS =====
+    async function loadCategorias() {
+        const loader = document.getElementById('loader-categorias');
+        const table = document.getElementById('table-categorias');
+        const tbody = document.getElementById('tbody-categorias');
+
+        loader.style.display = 'block';
+        table.style.display = 'none';
+
+        try {
+            const response = await fetchWithAuth(`${API_URL}/categorias`);
+            const data = await response.json();
+
+            loader.style.display = 'none';
+            table.classList.remove('hidden');
+            table.style.display = 'table';
+
+            tbody.innerHTML = '';
+            data.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><strong>#${item.id}</strong></td>
+                    <td>${item.nombre}</td>
+                    <td>${item.descripcion || '-'}</td>
+                    <td><span class="badge badge-info">${item.productosCount || 0}</span></td>
+                    <td>
+                        <div class="actions">
+                            <button class="btn btn-secondary" onclick="editCategoria(${item.id})">Editar</button>
+                            <button class="btn btn-danger" onclick="deleteCategoria(${item.id})">Eliminar</button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        } catch (error) {
+            console.error('Error:', error);
+            loader.style.display = 'none';
+            table.style.display = 'table';
+        }
+    }
+
+    function openCategoriaModal(id = null) {
+        currentCategoriaId = id;
+        document.getElementById('categoriaModalTitle').textContent = id ? 'Editar Categoría' : 'Nueva Categoría';
+        document.getElementById('categoriaForm').reset();
+        document.getElementById('categoriaAlert').classList.remove('show');
+
+        if (id) loadCategoriaData(id);
+
+        document.getElementById('categoriaModal').classList.add('show');
+    }
+
+    function closeCategoriaModal() {
+        document.getElementById('categoriaModal').classList.remove('show');
+        currentCategoriaId = null;
+    }
+
+    async function loadCategoriaData(id) {
+        try {
+            const response = await fetchWithAuth(`${API_URL}/categorias/${id}`);
+            const data = await response.json();
+
+            document.getElementById('categoriaId').value = data.id;
+            document.getElementById('categoriaNombre').value = data.nombre;
+            document.getElementById('categoriaDescripcion').value = data.descripcion || '';
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+
+    async function submitCategoria(e) {
+        e.preventDefault();
+
+        const data = {
+            nombre: document.getElementById('categoriaNombre').value.trim(),
+            descripcion: document.getElementById('categoriaDescripcion').value.trim()
+        };
+
+        try {
+            const url = currentCategoriaId
+                ? `${API_URL}/categorias/${currentCategoriaId}`
+                : `${API_URL}/categorias`;
+
+            const method = currentCategoriaId ? 'PUT' : 'POST';
+
+            const response = await fetchWithAuth(url, {
+                method: method,
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+                showAlert('categoriaAlert', 'success', 'Categoría guardada correctamente');
+                setTimeout(() => {
+                    closeCategoriaModal();
+                    loadCategorias();
+                    loadStats();
+                    loadProductoSelects();
+                }, 1000);
+            } else {
+                const error = await response.json();
+                showAlert('categoriaAlert', 'error', error.message || 'Error al guardar');
+            }
+        } catch (error) {
+            showAlert('categoriaAlert', 'error', 'Error de conexión');
+        }
+    }
+
+    async function editCategoria(id) {
+        openCategoriaModal(id);
+    }
+
+    async function deleteCategoria(id) {
+        if (!confirm('¿Eliminar esta categoría? Los productos asociados quedarán sin categoría.')) return;
+
+        try {
+            const response = await fetchWithAuth(`${API_URL}/categorias/${id}`, {
+                method: 'DELETE'
+            });
+
+            if (response.ok) {
+                alert('Categoría eliminada');
+                loadCategorias();
+                loadStats();
+                loadProductoSelects();
             } else {
                 const error = await response.json();
                 alert(error.message || 'Error al eliminar');
@@ -1056,6 +1187,42 @@
     }
 
     // ===== PRODUCTOS =====
+    async function loadProductoSelects() {
+        try {
+            // Cargar restaurantes
+            const restaurantesRes = await fetchWithAuth(`${API_URL}/restaurantes?size=100`);
+            const restaurantes = await restaurantesRes.json();
+
+            const selectRestaurante = document.getElementById('productoRestaurante');
+            const filterRestaurante = document.getElementById('filter-restaurante');
+
+            selectRestaurante.innerHTML = '<option value="">Seleccionar restaurante</option>';
+            filterRestaurante.innerHTML = '<option value="">Todos los restaurantes</option>';
+
+            restaurantes.content.forEach(r => {
+                selectRestaurante.innerHTML += `<option value="${r.id}">${r.nombre}</option>`;
+                filterRestaurante.innerHTML += `<option value="${r.id}">${r.nombre}</option>`;
+            });
+
+            // Cargar categorías
+            const categoriasRes = await fetchWithAuth(`${API_URL}/categorias`);
+            const categorias = await categoriasRes.json();
+
+            const selectCategoria = document.getElementById('productoCategoria');
+            const filterCategoria = document.getElementById('filter-categoria');
+
+            selectCategoria.innerHTML = '<option value="">Seleccionar categoría</option>';
+            filterCategoria.innerHTML = '<option value="">Todas las categorías</option>';
+
+            categorias.forEach(c => {
+                selectCategoria.innerHTML += `<option value="${c.id}">${c.nombre}</option>`;
+                filterCategoria.innerHTML += `<option value="${c.id}">${c.nombre}</option>`;
+            });
+        } catch (error) {
+            console.error('Error cargando selects:', error);
+        }
+    }
+
     async function loadProductos() {
         const loader = document.getElementById('loader-productos');
         const table = document.getElementById('table-productos');
@@ -1064,15 +1231,16 @@
         loader.style.display = 'block';
         table.classList.add('hidden');
 
+        const restauranteId = document.getElementById('filter-restaurante').value;
+        const categoriaId = document.getElementById('filter-categoria').value;
+        const disponible = document.getElementById('filter-disponible').value;
+
+        let url = `${API_URL}/productos/filtrar?size=100`;
+        if (restauranteId) url += `&restauranteId=${restauranteId}`;
+        if (categoriaId) url += `&categoriaId=${categoriaId}`;
+        if (disponible) url += `&disponible=${disponible}`;
+
         try {
-            let url = `${API_URL}/productos/filtrar?size=100`;
-
-            const restauranteFilter = document.getElementById('filter-restaurante').value;
-            const disponibleFilter = document.getElementById('filter-disponible').value;
-
-            if (restauranteFilter) url += `&restauranteId=${restauranteFilter}`;
-            if (disponibleFilter) url += `&disponible=${disponibleFilter}`;
-
             const response = await fetchWithAuth(url);
             const data = await response.json();
 
@@ -1085,9 +1253,10 @@
                 tr.innerHTML = `
                     <td><strong>#${item.id}</strong></td>
                     <td>${item.nombre}</td>
-                    <td>${item.restauranteNombre}</td>
-                    <td>€${item.precio}</td>
-                    <td>${item.stock}</td>
+                    <td>${item.restauranteNombre || '-'}</td>
+                    <td>${item.categoriaNombre || '-'}</td>
+                    <td><strong>${item.precio}€</strong></td>
+                    <td><span class="badge badge-warning">${item.stock}</span></td>
                     <td><span class="badge ${item.disponible ? 'badge-success' : 'badge-danger'}">${item.disponible ? 'Disponible' : 'No disponible'}</span></td>
                     <td>
                         <div class="actions">
@@ -1103,42 +1272,14 @@
         }
     }
 
-    async function loadProductoSelects() {
-        try {
-            // Cargar solo restaurantes
-            const resRestaurantes = await fetchWithAuth(`${API_URL}/restaurantes?size=100`);
-            const restaurantes = await resRestaurantes.json();
-
-            const selectRestaurante = document.getElementById('productoRestaurante');
-            const filterRestaurante = document.getElementById('filter-restaurante');
-
-            selectRestaurante.innerHTML = '<option value="">Seleccionar restaurante...</option>';
-            filterRestaurante.innerHTML = '<option value="">Todos los restaurantes</option>';
-
-            restaurantes.content.forEach(r => {
-                selectRestaurante.innerHTML += `<option value="${r.id}">${r.nombre}</option>`;
-                filterRestaurante.innerHTML += `<option value="${r.id}">${r.nombre}</option>`;
-            });
-
-        } catch (error) {
-            console.error('Error cargando selects:', error);
-        }
-    }
-
-    // FIX PRINCIPAL: Cargar restaurantes ANTES de abrir el modal
-    async function openProductoModal(id = null) {
+    function openProductoModal(id = null) {
         currentProductoId = id;
         document.getElementById('productoModalTitle').textContent = id ? 'Editar Producto' : 'Nuevo Producto';
         document.getElementById('productoForm').reset();
         document.getElementById('productoAlert').classList.remove('show');
+        document.getElementById('productoDisponible').checked = true;
 
-        // IMPORTANTE: Cargar los restaurantes PRIMERO
-        await loadProductoSelects();
-
-        // Luego cargar los datos si es edición
-        if (id) {
-            await loadProductoData(id);
-        }
+        if (id) loadProductoData(id);
 
         document.getElementById('productoModal').classList.add('show');
     }
@@ -1158,8 +1299,9 @@
             document.getElementById('productoDescripcion').value = data.descripcion || '';
             document.getElementById('productoPrecio').value = data.precio;
             document.getElementById('productoStock').value = data.stock;
-            document.getElementById('productoRestaurante').value = data.restauranteId;
-            document.getElementById('productoDisponible').value = data.disponible.toString();
+            document.getElementById('productoRestaurante').value = data.restauranteId || '';
+            document.getElementById('productoCategoria').value = data.categoriaId || '';
+            document.getElementById('productoDisponible').checked = data.disponible;
         } catch (error) {
             console.error('Error:', error);
         }
@@ -1168,26 +1310,15 @@
     async function submitProducto(e) {
         e.preventDefault();
 
-        // Validar que se haya seleccionado un restaurante
-        const restauranteId = document.getElementById('productoRestaurante').value;
-        if (!restauranteId) {
-            showAlert('productoAlert', 'error', 'Debe seleccionar un restaurante');
-            return;
-        }
-
-        const descripcionValue = document.getElementById('productoDescripcion').value.trim();
-
         const data = {
-            nombre: document.getElementById('productoNombre').value.trim(),
-            descripcion: descripcionValue || null,
+            nombre: document.getElementById('productoNombre').value,
+            descripcion: document.getElementById('productoDescripcion').value,
             precio: parseFloat(document.getElementById('productoPrecio').value),
             stock: parseInt(document.getElementById('productoStock').value),
-            restauranteId: parseInt(restauranteId),
-            // categoriaId se auto-asigna en el backend
-            disponible: document.getElementById('productoDisponible').value === 'true'
+            restauranteId: parseInt(document.getElementById('productoRestaurante').value),
+            categoriaId: parseInt(document.getElementById('productoCategoria').value) || null,
+            disponible: document.getElementById('productoDisponible').checked
         };
-
-        console.log('📦 Enviando producto:', data);
 
         try {
             const url = currentProductoId
@@ -1210,11 +1341,9 @@
                 }, 1000);
             } else {
                 const error = await response.json();
-                console.error('❌ Error del servidor:', error);
                 showAlert('productoAlert', 'error', error.message || 'Error al guardar');
             }
         } catch (error) {
-            console.error('❌ Error de conexión:', error);
             showAlert('productoAlert', 'error', 'Error de conexión');
         }
     }
@@ -1260,27 +1389,32 @@
             loader.style.display = 'none';
             table.classList.remove('hidden');
 
-            tbody.innerHTML = '';
-            let filtered = data.content;
-
             const estadoFilter = document.getElementById('filter-estado-pedido').value;
+            let pedidos = data.content;
+
             if (estadoFilter) {
-                filtered = filtered.filter(p => p.estado === estadoFilter);
+                pedidos = pedidos.filter(p => p.estado === estadoFilter);
             }
 
-            filtered.forEach(item => {
+            tbody.innerHTML = '';
+            pedidos.forEach(item => {
+                const estadoBadge = {
+                    'PENDIENTE': 'badge-warning',
+                    'EN_PREPARACION': 'badge-info',
+                    'EN_CAMINO': 'badge-info',
+                    'ENTREGADO': 'badge-success',
+                    'CANCELADO': 'badge-danger'
+                };
+
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td><strong>#${item.id}</strong></td>
                     <td>${item.clienteNombre}</td>
                     <td>${item.fechaPedido}</td>
-                    <td>${formatEstado(item.estado)}</td>
-                    <td><strong>€${item.total}</strong></td>
+                    <td><span class="badge ${estadoBadge[item.estado] || 'badge-info'}">${item.estado}</span></td>
+                    <td><strong>${item.total}€</strong></td>
                     <td>
-                        <div class="actions">
-                            <button class="btn btn-secondary" onclick="viewPedido(${item.id})">Ver</button>
-                            <button class="btn btn-primary" onclick="openPedidoEstadoModal(${item.id}, '${item.estado}')">Estado</button>
-                        </div>
+                        <button class="btn btn-secondary" onclick="viewPedido(${item.id})">Ver</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -1290,44 +1424,35 @@
         }
     }
 
-    function formatEstado(estado) {
-        const estados = {
-            'PENDIENTE': '<span class="badge badge-warning">Pendiente</span>',
-            'EN_PREPARACION': '<span class="badge badge-info">En Preparación</span>',
-            'EN_CAMINO': '<span class="badge badge-info">En Camino</span>',
-            'ENTREGADO': '<span class="badge badge-success">Entregado</span>',
-            'CANCELADO': '<span class="badge badge-danger">Cancelado</span>'
-        };
-        return estados[estado] || estado;
-    }
-
     async function viewPedido(id) {
         try {
             const response = await fetchWithAuth(`${API_URL}/pedidos/${id}`);
             const data = await response.json();
 
+            let detallesHTML = '';
+            if (data.detalles && data.detalles.length > 0) {
+                detallesHTML = '<div style="margin-top:1rem"><strong>Productos:</strong><ul style="margin-left:1.5rem;margin-top:.5rem">';
+                data.detalles.forEach(d => {
+                    detallesHTML += `<li>${d.productoNombre} x ${d.cantidad} - ${d.subtotal}€</li>`;
+                });
+                detallesHTML += '</ul></div>';
+            }
+
             const detalle = document.getElementById('pedidoDetalle');
             detalle.innerHTML = `
                 <div style="margin-bottom:1rem"><strong>Pedido #${data.id}</strong></div>
                 <div style="margin-bottom:.5rem"><strong>Cliente:</strong> ${data.clienteNombre}</div>
-                <div style="margin-bottom:.5rem"><strong>Repartidor:</strong> ${data.repartidorNombre || 'Sin asignar'}</div>
                 <div style="margin-bottom:.5rem"><strong>Fecha:</strong> ${data.fechaPedido}</div>
-                <div style="margin-bottom:.5rem"><strong>Estado:</strong> ${formatEstado(data.estado)}</div>
-                <div style="margin-bottom:.5rem"><strong>Total:</strong> €${data.total}</div>
+                <div style="margin-bottom:.5rem"><strong>Estado:</strong> ${data.estado}</div>
+                <div style="margin-bottom:.5rem"><strong>Total:</strong> ${data.total}€</div>
+                ${data.repartidorNombre ? `<div style="margin-bottom:.5rem"><strong>Repartidor:</strong> ${data.repartidorNombre}</div>` : ''}
                 <hr style="margin:1rem 0">
-                <div style="margin-bottom:1rem"><strong>Dirección de Entrega:</strong></div>
-                <div>${data.direccionEntrega || '-'}</div>
-                <div>${data.ciudadEntrega || '-'}, ${data.codigoPostalEntrega || '-'}</div>
-                <div>${data.provinciaEntrega || '-'}, ${data.paisEntrega || '-'}</div>
+                <div><strong>Dirección de entrega:</strong></div>
+                <div>${data.direccionEntrega}</div>
+                <div>${data.ciudadEntrega}, ${data.codigoPostalEntrega}</div>
+                <div>${data.provinciaEntrega}, ${data.paisEntrega}</div>
                 ${data.observaciones ? `<div style="margin-top:1rem"><strong>Observaciones:</strong> ${data.observaciones}</div>` : ''}
-                <hr style="margin:1rem 0">
-                <div style="margin-bottom:1rem"><strong>Productos:</strong></div>
-                ${data.detalles.map(d => `
-                    <div style="display:flex;justify-content:space-between;margin-bottom:.5rem">
-                        <span>${d.cantidad}x ${d.productoNombre}</span>
-                        <span>€${d.subtotal}</span>
-                    </div>
-                `).join('')}
+                ${detallesHTML}
             `;
 
             document.getElementById('pedidoModal').classList.add('show');
@@ -1338,99 +1463,6 @@
 
     function closePedidoModal() {
         document.getElementById('pedidoModal').classList.remove('show');
-    }
-
-    function openPedidoEstadoModal(id, estadoActual) {
-        document.getElementById('pedidoEstadoId').value = id;
-        document.getElementById('pedidoNuevoEstado').value = estadoActual;
-        document.getElementById('pedidoEstadoAlert').classList.remove('show');
-        document.getElementById('pedidoEstadoModal').classList.add('show');
-    }
-
-    function closePedidoEstadoModal() {
-        document.getElementById('pedidoEstadoModal').classList.remove('show');
-    }
-
-    async function submitPedidoEstado(e) {
-        e.preventDefault();
-
-        const id = document.getElementById('pedidoEstadoId').value;
-        const nuevoEstado = document.getElementById('pedidoNuevoEstado').value;
-
-        try {
-            const response = await fetchWithAuth(`${API_URL}/pedidos/${id}/estado?estado=${nuevoEstado}`, {
-                method: 'PATCH'
-            });
-
-            if (response.ok) {
-                showAlert('pedidoEstadoAlert', 'success', 'Estado actualizado correctamente');
-                setTimeout(() => {
-                    closePedidoEstadoModal();
-                    loadPedidos();
-                }, 1000);
-            } else {
-                const error = await response.json();
-                showAlert('pedidoEstadoAlert', 'error', error.message || 'Error al actualizar');
-            }
-        } catch (error) {
-            showAlert('pedidoEstadoAlert', 'error', 'Error de conexión');
-        }
-    }
-
-    async function openAsignarRepartidorModal(pedidoId) {
-        document.getElementById('asignarPedidoId').value = pedidoId;
-        document.getElementById('asignarRepartidorAlert').classList.remove('show');
-
-        // Cargar repartidores activos
-        try {
-            const response = await fetchWithAuth(`${API_URL}/repartidores/activos?size=100`);
-            const data = await response.json();
-
-            const select = document.getElementById('asignarRepartidorSelect');
-            select.innerHTML = '<option value="">Seleccionar repartidor...</option>';
-
-            data.content.forEach(r => {
-                const option = document.createElement('option');
-                option.value = r.id;
-                option.textContent = `${r.nombre} ${r.apellidos} - ${r.matriculaVehiculo}`;
-                select.appendChild(option);
-            });
-
-            document.getElementById('asignarRepartidorModal').classList.add('show');
-        } catch (error) {
-            alert('Error al cargar repartidores');
-        }
-    }
-
-    function closeAsignarRepartidorModal() {
-        document.getElementById('asignarRepartidorModal').classList.remove('show');
-    }
-
-    async function submitAsignarRepartidor(e) {
-        e.preventDefault();
-
-        const pedidoId = document.getElementById('asignarPedidoId').value;
-        const repartidorId = document.getElementById('asignarRepartidorSelect').value;
-
-        try {
-            const response = await fetchWithAuth(
-                `${API_URL}/pedidos/${pedidoId}/asignar-repartidor?repartidorId=${repartidorId}`,
-                { method: 'PATCH' }
-            );
-
-            if (response.ok) {
-                showAlert('asignarRepartidorAlert', 'success', 'Repartidor asignado correctamente');
-                setTimeout(() => {
-                    closeAsignarRepartidorModal();
-                    loadPedidos();
-                }, 1000);
-            } else {
-                const error = await response.json();
-                showAlert('asignarRepartidorAlert', 'error', error.message || 'Error al asignar');
-            }
-        } catch (error) {
-            showAlert('asignarRepartidorAlert', 'error', 'Error de conexión');
-        }
     }
 
     // ===== CLIENTES =====
@@ -1524,17 +1556,18 @@
 
             filtered.forEach(item => {
                 const tr = document.createElement('tr');
+                const esActivo = item.activo === true || item.activo === 1 || item.activo === '1';
                 tr.innerHTML = `
                     <td><strong>#${item.id}</strong></td>
                     <td>${item.nombre} ${item.apellidos}</td>
                     <td>${item.email || ''}</td>
                     <td>${item.telefono || ''}</td>
                     <td>${item.matriculaVehiculo || ''}</td>
-                    <td><span class="badge ${item.activo ? 'badge-success' : 'badge-danger'}">${item.activo ? 'Activo' : 'Inactivo'}</span></td>
+                    <td><span class="badge ${esActivo ? 'badge-success' : 'badge-danger'}">${esActivo ? 'Activo' : 'Inactivo'}</span></td>
                     <td>
                         <div class="actions">
-                            <button class="btn ${item.activo ? 'btn-secondary' : 'btn-success'}" onclick="toggleRepartidorEstado(${item.id}, ${!item.activo})">
-                                ${item.activo ? 'Desactivar' : 'Activar'}
+                            <button class="btn ${esActivo ? 'btn-secondary' : 'btn-success'}" onclick="toggleRepartidorEstado(${item.id}, ${!esActivo})">
+                                ${esActivo ? 'Desactivar' : 'Activar'}
                             </button>
                             <button class="btn btn-secondary" onclick="editRepartidor(${item.id})">Editar</button>
                             <button class="btn btn-danger" onclick="deleteRepartidor(${item.id})">Eliminar</button>
