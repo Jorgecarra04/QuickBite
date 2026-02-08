@@ -35,9 +35,6 @@ public class DetallePedido {
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal subtotal;
 
-    /**
-     * Calcula el subtotal y lo retorna (también lo asigna al campo)
-     */
     public BigDecimal calcularSubtotal() {
         if (precioUnitario != null && cantidad != null) {
             this.subtotal = precioUnitario.multiply(BigDecimal.valueOf(cantidad));
@@ -47,9 +44,6 @@ public class DetallePedido {
         return this.subtotal;
     }
 
-    /**
-     * Obtiene el subtotal, calculándolo si es null
-     */
     public BigDecimal getSubtotal() {
         if (subtotal == null) {
             calcularSubtotal();

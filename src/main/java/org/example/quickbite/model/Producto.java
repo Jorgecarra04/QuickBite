@@ -47,9 +47,6 @@ public class Producto {
     @OneToMany(mappedBy = "producto")
     private List<DetallePedido> detallesPedido = new ArrayList<>();
 
-    /**
-     * Reduce el stock del producto
-     */
     public void reducirStock(int cantidad) {
         if (this.stock >= cantidad) {
             this.stock -= cantidad;
@@ -61,9 +58,6 @@ public class Producto {
         }
     }
 
-    /**
-     * Aumenta el stock del producto
-     */
     public void aumentarStock(int cantidad) {
         this.stock += cantidad;
         if (this.stock > 0) {

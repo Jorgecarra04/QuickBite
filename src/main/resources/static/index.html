@@ -130,7 +130,7 @@
                 <div class="dropdown" id="userMenu">
                     <div class="dropdown-header">
                         <div class="dropdown-user-name" id="dropdownUsername">Usuario</div>
-                        <div class="dropdown-user-email" id="dropdownEmail"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="2e5b5d5b4f5c47416e4b434f4742004d4143">[email&#160;protected]</a></div>
+                        <div class="dropdown-user-email" id="dropdownEmail">email@ejemplo.com</div>
                     </div>
                     <div class="dropdown-item" onclick="showSection('profile')"><span class="dropdown-icon"></span><span>Mi Perfil</span></div>
                     <div class="dropdown-item" onclick="showSection('orders')"><span class="dropdown-icon"></span><span>Mis Pedidos</span></div>
@@ -177,7 +177,7 @@
                 <div class="profile-avatar" id="profileAvatar">U</div>
                 <div class="profile-info">
                     <div class="profile-name" id="profileName">Usuario</div>
-                    <div class="profile-email" id="profileEmail"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="80e5ede1e9ecc0e5f8e1edf0ece5aee3efed">[email&#160;protected]</a></div>
+                    <div class="profile-email" id="profileEmail">email@ejemplo.com</div>
                 </div>
             </div>
             <div class="profile-detail"><div class="profile-detail-label">Teléfono:</div><div id="profilePhone">-</div></div>
@@ -221,9 +221,9 @@
         </div>
     </div>
 </div>
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script>
     const API_URL='http://localhost:8080/api';
-    let cart=[],currentRestaurantId=null,currentFilter='all',allProducts=[],categories=[],userProfile=null;
+    let cart=[],currentRestaurantId=null,currentRestaurantActivo=true,currentFilter='all',allProducts=[],categories=[],userProfile=null;
 
     async function fetchWithAuth(url,options={}){
         const token=localStorage.getItem('token');
@@ -268,20 +268,37 @@
             const response=await fetchWithAuth(`${API_URL}/restaurantes?size=100`);
             const data=await response.json();
             loader.style.display='none';
-            const restaurants=data.content||[],activos=restaurants.filter(r=>r.activo!==false);
-            if(activos.length===0){grid.innerHTML='<div class="empty">No hay restaurantes disponibles</div>';return}
+            const restaurants=data.content||[];
+
+            console.log('=== DEBUG RESTAURANTES ===');
+            console.log('Total restaurantes:', restaurants.length);
+            restaurants.forEach(r=>console.log(`ID:${r.id} Nombre:${r.nombre} Activo:${r.activo} Tipo:${typeof r.activo}`));
+
+            const activos=restaurants.filter(r=>{
+                const ok=r.activo===true||r.activo===1||r.activo==='1';
+                console.log(`ID ${r.id} activo=${r.activo} pasa=${ok}`);
+                return ok;
+            });
+            console.log('Activos filtrados:',activos.length);
+
+            if(activos.length===0){grid.innerHTML='<div class="empty">No hay restaurantes disponibles en este momento</div>';return}
             activos.forEach(restaurant=>{
                 const card=document.createElement('div');
                 card.className='card';
-                card.onclick=()=>viewRestaurantProducts(restaurant.id,restaurant.nombre);
+                card.onclick=()=>viewRestaurantProducts(restaurant.id,restaurant.nombre,restaurant.activo);
                 card.innerHTML=`<img src="${restaurant.imagenUrl||'https://via.placeholder.com/400x200?text=Restaurante'}" class="card-img" alt="${restaurant.nombre}"><div class="card-body"><div class="card-title">${restaurant.nombre}</div><div class="card-desc">${restaurant.descripcion||''}</div><div style="margin-top:1rem"><div style="font-size:.85rem;color:var(--gray)">📍 ${restaurant.direccion}</div></div></div>`;
                 grid.appendChild(card)
             })
         }catch(error){console.error('Error:',error);loader.style.display='none';grid.innerHTML='<div class="empty">Error al cargar restaurantes</div>'}
     }
 
-    async function viewRestaurantProducts(restaurantId,restaurantName){
+    async function viewRestaurantProducts(restaurantId,restaurantName,restaurantActivo){
+        if(!restaurantActivo){
+            alert('Este restaurante no está disponible en este momento');
+            return;
+        }
         currentRestaurantId=restaurantId;
+        currentRestaurantActivo=restaurantActivo;
         document.getElementById('restaurantName').textContent=restaurantName;
         document.getElementById('restaurantGrid').style.display='none';
         document.getElementById('restaurantLoader').style.display='none';
@@ -291,7 +308,10 @@
     }
 
     function backToRestaurants(){
-        currentRestaurantId=null;cart=[];updateCart();
+        currentRestaurantId=null;
+        currentRestaurantActivo=true;
+        cart=[];
+        updateCart();
         document.getElementById('restaurantGrid').style.display='grid';
         document.getElementById('productsSection').classList.add('hidden')
     }
@@ -302,6 +322,17 @@
         const loader=document.getElementById('productLoader'),grid=document.getElementById('productGrid'),empty=document.getElementById('productEmpty');
         loader.classList.remove('hidden');grid.innerHTML='';empty.classList.add('hidden');
         try{
+            // Primero verificar que el restaurante esté activo
+            const restaurantResponse = await fetchWithAuth(`${API_URL}/restaurantes/${restaurantId}`);
+            const restaurantData = await restaurantResponse.json();
+
+            // Si el restaurante no está activo, mostrar mensaje y volver
+            if(!restaurantData.activo || restaurantData.activo === false || restaurantData.activo === 0){
+                loader.classList.add('hidden');
+                grid.innerHTML = '<div class="empty" style="padding:3rem;text-align:center;color:#ef476f;"><h3>⚠️ Restaurante no disponible</h3><p style="margin-top:1rem;">Este restaurante está temporalmente cerrado.</p><button class="btn btn-secondary" onclick="backToRestaurants()" style="margin-top:1.5rem;">Volver a restaurantes</button></div>';
+                return;
+            }
+
             const response=await fetchWithAuth(`${API_URL}/productos/filtrar?restauranteId=${restaurantId}&size=100`);
             const data=await response.json();
             allProducts=data.content;
@@ -327,6 +358,10 @@
     }
 
     function addToCart(product){
+        if(!currentRestaurantActivo){
+            alert('Este restaurante no está disponible en este momento. No puedes agregar productos al carrito.');
+            return;
+        }
         const existing=cart.find(item=>item.id===product.id);
         if(existing){
             if(existing.cantidad<product.stock)existing.cantidad++;

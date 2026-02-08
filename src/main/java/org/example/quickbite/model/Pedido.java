@@ -71,9 +71,7 @@ public class Pedido {
     @Builder.Default
     private List<DetallePedido> detalles = new ArrayList<>();
 
-    /**
-     * Calcula el total del pedido sumando los subtotales de todos los detalles
-     */
+    //Calcula el total del pedido sumando los subtotales de todos los detalles
     public void calcularTotal() {
         if (detalles == null || detalles.isEmpty()) {
             this.total = BigDecimal.ZERO;
