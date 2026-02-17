@@ -33,10 +33,15 @@ public class SecurityConfig {
                 .cors(cors -> cors.configure(http))
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        // Endpoints públicos de autenticación
+
+                        .requestMatchers(
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/v3/api-docs.yaml"
+                        ).permitAll()
+
                         .requestMatchers("/api/auth/**").permitAll()
 
-                        // Recursos estáticos HTML, CSS, JS
                         .requestMatchers(
                                 "/",
                                 "/index.html",
@@ -48,25 +53,18 @@ public class SecurityConfig {
                                 "/favicon.ico"
                         ).permitAll()
 
-                        // USUARIOS pueden ver su propio perfil
-                        .requestMatchers("/api/clientes/mi-perfil").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/api/clientes/mi-perfil")
+                        .hasAnyRole("USER", "ADMIN")
 
-                        // SOLO ADMIN puede gestionar clientes y repartidores
                         .requestMatchers("/api/clientes/**").hasRole("ADMIN")
                         .requestMatchers("/api/repartidores/**").hasRole("ADMIN")
-
-                        // Endpoints de administración solo para ADMIN
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
-                        // Restaurantes, productos, categorías - todos los autenticados
                         .requestMatchers("/api/restaurantes/**").authenticated()
                         .requestMatchers("/api/productos/**").authenticated()
                         .requestMatchers("/api/categorias/**").authenticated()
-
-                        // Pedidos - todos los autenticados
                         .requestMatchers("/api/pedidos/**").authenticated()
 
-                        // Todos los demás endpoints requieren autenticación
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
@@ -87,7 +85,9 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+    public AuthenticationManager authenticationManager(
+            AuthenticationConfiguration config
+    ) throws Exception {
         return config.getAuthenticationManager();
     }
 
