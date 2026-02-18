@@ -29,7 +29,7 @@ CREATE TABLE `categorias` (
   `descripcion` varchar(500) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `nombre` (`nombre`)
-) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=33 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -58,9 +58,7 @@ INSERT INTO `categorias` VALUES
 (17,'Vegana','Platos veganos saludables'),
 (18,'Pollo','Platos elaborados con pollo'),
 (19,'Carne','Carnes rojas a la parrilla'),
-(20,'Pescado','Pescados y mariscos frescos'),
-(21,'Pizza',NULL),
-(25,'gdgdgf',NULL);
+(20,'Pescado','Pescados y mariscos frescos');
 /*!40000 ALTER TABLE `categorias` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -84,7 +82,7 @@ CREATE TABLE `clientes` (
   UNIQUE KEY `usuario_id` (`usuario_id`),
   KEY `idx_ciudad` (`ciudad`),
   CONSTRAINT `clientes_ibfk_1` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=71 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=73 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -146,11 +144,7 @@ INSERT INTO `clientes` VALUES
 (50,51,'654327028','Calle Mayor 78','Zaragoza','96763','Barcelona','España'),
 (64,52,'611222333','Calle Prueba 123','Madrid','28001','Madrid','España'),
 (65,53,'661212122','fsdfsfs','fdsfsfs','13132','fdsfsfsd','España'),
-(66,54,'666666666','fsdfsfsd','sdfsfsd','42342','sdfsdfs','España'),
-(67,55,'666666666','asdasd','sadasd','32132','asdasd','España'),
-(68,56,'666666666',NULL,NULL,NULL,NULL,NULL),
-(69,57,'666666666',NULL,NULL,NULL,NULL,NULL),
-(70,58,'666666666','sdfsf','sdfsd','13600','sadadsa','España');
+(72,60,'666666666',NULL,NULL,NULL,NULL,NULL);
 /*!40000 ALTER TABLE `clientes` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -174,7 +168,7 @@ CREATE TABLE `detalle_pedido` (
   KEY `idx_detalle_pedido_compuesto` (`pedido_id`,`producto_id`),
   CONSTRAINT `detalle_pedido_ibfk_1` FOREIGN KEY (`pedido_id`) REFERENCES `pedidos` (`id`) ON DELETE CASCADE,
   CONSTRAINT `detalle_pedido_ibfk_2` FOREIGN KEY (`producto_id`) REFERENCES `productos` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=167 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=178 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -266,16 +260,7 @@ INSERT INTO `detalle_pedido` VALUES
 (154,80,132,3,1.50,4.50),
 (155,80,126,1,8.50,8.50),
 (156,81,125,1,2.00,2.00),
-(157,82,125,1,2.00,2.00),
-(158,83,128,1,10.50,10.50),
-(159,83,126,1,8.50,8.50),
-(160,83,127,1,11.00,11.00),
-(161,84,125,5,2.00,10.00),
-(162,84,124,2,12.50,25.00),
-(163,84,122,2,9.50,19.00),
-(164,85,125,1,2.00,2.00),
-(165,85,124,1,12.50,12.50),
-(166,85,122,2,9.50,19.00);
+(177,96,124,3,12.50,37.50);
 /*!40000 ALTER TABLE `detalle_pedido` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -307,7 +292,7 @@ CREATE TABLE `pedidos` (
   KEY `idx_pedidos_fecha_estado` (`fecha_pedido`,`estado`),
   CONSTRAINT `pedidos_ibfk_1` FOREIGN KEY (`cliente_id`) REFERENCES `clientes` (`id`) ON DELETE CASCADE,
   CONSTRAINT `pedidos_ibfk_2` FOREIGN KEY (`repartidor_id`) REFERENCES `repartidores` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=86 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=97 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -398,10 +383,7 @@ INSERT INTO `pedidos` VALUES
 (79,'2025-12-31 10:06:41','CANCELADO',52.50,'Sin cebolla','Calle Fuencarral 108','Madrid','63252','Zaragoza','España',22,NULL),
 (80,'2026-01-27 10:06:41','EN_CAMINO',38.00,NULL,'Calle Fuencarral 179','Madrid','45780','Zaragoza','España',45,24),
 (81,'2026-01-28 15:51:22','EN_PREPARACION',2.00,NULL,'fsdfsfs','fdsfsfs','13132','fdsfsfsd','España',65,1),
-(82,'2026-02-02 12:02:23','EN_CAMINO',2.00,NULL,'dfgdfg','dgdfg','34245','sfsdfs','España',66,1),
-(83,'2026-02-02 17:27:47','EN_PREPARACION',30.00,NULL,'fsdfsfsd','sdfsfsd','42342','sdfsdfs','España',66,2),
-(84,'2026-02-03 08:09:45','EN_PREPARACION',54.00,NULL,'asdasd','sadasd','32132','asdasd','España',67,2),
-(85,'2026-02-03 20:38:45','EN_PREPARACION',33.50,NULL,'sdfsf','sdfsd','13600','sadadsa','España',70,2);
+(96,'2026-02-17 11:38:53','PENDIENTE',37.50,'','fsdfsfsd','sdfsfsd','13600','sdfsdfs','España',72,NULL);
 /*!40000 ALTER TABLE `pedidos` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -422,13 +404,14 @@ CREATE TABLE `productos` (
   `restaurante_id` bigint(20) NOT NULL,
   `categoria_id` bigint(20) NOT NULL,
   PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_nombre` (`nombre`),
   KEY `idx_restaurante` (`restaurante_id`),
   KEY `idx_categoria` (`categoria_id`),
   KEY `idx_disponible` (`disponible`),
   KEY `idx_productos_restaurante_disponible` (`restaurante_id`,`disponible`),
   CONSTRAINT `productos_ibfk_1` FOREIGN KEY (`restaurante_id`) REFERENCES `restaurantes` (`id`) ON DELETE CASCADE,
   CONSTRAINT `productos_ibfk_2` FOREIGN KEY (`categoria_id`) REFERENCES `categorias` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=143 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=144 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -438,25 +421,25 @@ CREATE TABLE `productos` (
 LOCK TABLES `productos` WRITE;
 /*!40000 ALTER TABLE `productos` DISABLE KEYS */;
 INSERT INTO `productos` VALUES
-(122,'Pizza Margarita','Tomate, mozzarella y albahaca fresca',9.50,1,105,1,14),
-(123,'Pizza Pepperoni','Tomate, mozzarella y pepperoni',11.00,1,98,1,13),
-(124,'Pizza Cuatro Quesos','Mozzarella, gorgonzola, parmesano y provolone',12.50,1,90,1,5),
-(125,'Coca-Cola 33cl','Bebida refrescante',2.00,1,5,1,5),
-(126,'Burger Clásica','180g de carne, lechuga, tomate, cebolla',8.50,1,53,2,14),
-(127,'Cheeseburger Doble','360g de carne, doble queso cheddar',11.00,1,89,2,1),
-(128,'Bacon Burger','200g de carne, bacon crujiente, queso',10.50,1,40,2,8),
-(129,'Nigiri Salmón (2 piezas)','Arroz con salmón fresco',4.50,1,51,3,13),
-(130,'California Roll (8 piezas)','Cangrejo, aguacate, pepino',8.50,1,70,3,10),
-(131,'Dragon Roll (8 piezas)','Anguila, aguacate, masago',12.00,1,70,3,12),
-(132,'Agua Mineral 50cl','Agua mineral natural',1.50,1,56,3,9),
-(133,'Tacos al Pastor (3 uds)','Cerdo marinado, piña, cilantro',7.50,1,55,4,1),
-(134,'Tacos de Carnitas (3 uds)','Cerdo confitado, cebolla, cilantro',7.00,1,81,4,10),
-(135,'Quesadilla de Queso','Tortilla con queso fundido',5.50,1,82,4,6),
-(136,'Horchata 50cl','Bebida tradicional mexicana',2.50,1,51,4,14),
-(137,'Espagueti Carbonara','Huevo, guanciale, pecorino romano',9.50,1,66,5,16),
-(138,'Lasaña Boloñesa','Carne, bechamel, mozzarella',11.00,1,73,5,1),
-(139,'Ravioli de Ricotta','Rellenos de queso ricotta y espinacas',10.50,1,39,5,15),
-(140,'Tiramisú','Postre italiano clásico',5.00,1,81,5,8);
+(122,'Pizza Margarita','Tomate, mozzarella y albahaca fresca',9.50,1,101,1,1),
+(123,'Pizza Pepperoni','Tomate, mozzarella y pepperoni',11.00,1,98,1,1),
+(124,'Pizza Cuatro Quesos','Mozzarella, gorgonzola, parmesano y provolone',12.50,1,86,1,1),
+(125,'Coca-Cola 33cl','Bebida refrescante',2.00,1,0,1,8),
+(126,'Burger Clásica','180g de carne, lechuga, tomate, cebolla',8.50,1,51,2,2),
+(127,'Cheeseburger Doble','360g de carne, doble queso cheddar',11.00,1,89,2,2),
+(128,'Bacon Burger','200g de carne, bacon crujiente, queso',10.50,1,29,2,2),
+(129,'Nigiri Salmón (2 piezas)','Arroz con salmón fresco',4.50,1,51,3,3),
+(130,'California Roll (8 piezas)','Cangrejo, aguacate, pepino',8.50,1,70,3,3),
+(131,'Dragon Roll (8 piezas)','Anguila, aguacate, masago',12.00,1,70,3,3),
+(132,'Agua Mineral 50cl','Agua mineral natural',1.50,1,0,3,8),
+(133,'Tacos al Pastor (3 uds)','Cerdo marinado, piña, cilantro',7.50,1,55,4,4),
+(134,'Tacos de Carnitas (3 uds)','Cerdo confitado, cebolla, cilantro',7.00,0,81,4,4),
+(135,'Quesadilla de Queso','Tortilla con queso fundido',5.50,1,82,4,4),
+(136,'Horchata 50cl','Bebida tradicional mexicana',2.50,1,51,4,8),
+(137,'Espagueti Carbonara','Huevo, guanciale, pecorino romano',9.50,1,66,5,5),
+(138,'Lasaña Boloñesa','Carne, bechamel, mozzarella',11.00,1,73,5,5),
+(139,'Ravioli de Ricotta','Rellenos de queso ricotta y espinacas',10.50,1,39,5,5),
+(140,'Tiramisú','Postre italiano clásico',5.00,1,81,5,7);
 /*!40000 ALTER TABLE `productos` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -479,7 +462,7 @@ CREATE TABLE `repartidores` (
   UNIQUE KEY `email` (`email`),
   KEY `idx_email` (`email`),
   KEY `idx_activo` (`activo`)
-) ENGINE=InnoDB AUTO_INCREMENT=33 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=34 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -489,7 +472,7 @@ CREATE TABLE `repartidores` (
 LOCK TABLES `repartidores` WRITE;
 /*!40000 ALTER TABLE `repartidores` DISABLE KEYS */;
 INSERT INTO `repartidores` VALUES
-(1,'Miguel','Rodríguez García','miguel.rodriguez@quickbite.com','612345678','1234ABC',1),
+(1,'Miguel','Rodríguez García','miguel.rodriguez@quickbite.com','612345678','1234ABC',0),
 (2,'David','López Martínez','david.lopez@quickbite.com','623456789','2345BCD',1),
 (3,'Jorge','González Pérez','jorge.gonzalez@quickbite.com','634567890','3456CDE',1),
 (4,'Carlos','Sánchez Fernández','carlos.sanchez@quickbite.com','645678901','4567DEF',1),
@@ -507,17 +490,17 @@ INSERT INTO `repartidores` VALUES
 (16,'Alejandro','Ramos Herrera','alejandro.ramos@quickbite.com','667890124','6780PQR',1),
 (17,'Daniel','Iglesias Méndez','daniel.iglesias@quickbite.com','678901235','7891QRS',1),
 (18,'Adrián','Castillo Campos','adrian.castillo@quickbite.com','689012346','8902RST',1),
-(19,'Mario','Rubio Prieto','mario.rubio@quickbite.com','690123457','9013STU',0),
-(20,'Víctor','Santos Pascual','victor.santos@quickbite.com','601234568','0124TUV',0),
-(21,'Miguel','Martínez Rodríguez','repartidor0@quickbite.com','672014935','5384DUQ',0),
-(22,'Alberto','Sánchez Sánchez','repartidor1@quickbite.com','617318451','7907SMB',0),
-(23,'David','Sánchez Rodríguez','repartidor2@quickbite.com','605181139','6433LGY',0),
+(19,'Mario','Rubio Prieto','mario.rubio@quickbite.com','690123457','9013STU',1),
+(20,'Víctor','Santos Pascual','victor.santos@quickbite.com','601234568','0124TUV',1),
+(21,'Miguel','Martínez Rodríguez','repartidor0@quickbite.com','672014935','5384DUQ',1),
+(22,'Alberto','Sánchez Sánchez','repartidor1@quickbite.com','617318451','7907SMB',1),
+(23,'David','Sánchez Rodríguez','repartidor2@quickbite.com','605181139','6433LGY',1),
 (24,'Alberto','Sánchez López','repartidor3@quickbite.com','632462825','5057SXD',1),
-(25,'Carlos','Rodríguez Martínez','repartidor4@quickbite.com','674787360','7039SEW',0),
+(25,'Carlos','Rodríguez Martínez','repartidor4@quickbite.com','674787360','7039SEW',1),
 (26,'Jorge','Sánchez García','repartidor5@quickbite.com','625467840','3155NYT',1),
 (27,'Alberto','Martínez García','repartidor6@quickbite.com','680214673','5228ATR',1),
 (28,'Miguel','Sánchez Sánchez','repartidor7@quickbite.com','630825404','3756ISS',1),
-(29,'Carlos','Sánchez García','repartidor8@quickbite.com','635422026','2919QQN',0),
+(29,'Carlos','Sánchez García','repartidor8@quickbite.com','635422026','2919QQN',1),
 (30,'Alberto','García Martínez','repartidor9@quickbite.com','627772520','8399BSM',0);
 /*!40000 ALTER TABLE `repartidores` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -538,9 +521,11 @@ CREATE TABLE `restaurantes` (
   `descripcion` varchar(500) DEFAULT NULL,
   `imagen_url` varchar(500) DEFAULT NULL,
   PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_nombre` (`nombre`),
+  UNIQUE KEY `unique_telefono` (`telefono`),
   KEY `idx_nombre` (`nombre`),
   KEY `idx_activo` (`activo`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -550,7 +535,7 @@ CREATE TABLE `restaurantes` (
 LOCK TABLES `restaurantes` WRITE;
 /*!40000 ALTER TABLE `restaurantes` DISABLE KEYS */;
 INSERT INTO `restaurantes` VALUES
-(1,'🍕 Pizzería Bella Napoli','Calle Gran Vía 123','911234567',1,'Las mejores pizzas artesanales de Madrid','https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800&q=80'),
+(1,'🍕 Pizzería Bella Napoli','Calle Gran Vía 123','123456789',1,'Las mejores pizzas artesanales de Madrid','https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800&q=80'),
 (2,'🍔 Burger Master','Avenida Castellana 456','912345678',1,'Hamburguesas gourmet 100% vacuno','https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&q=80'),
 (3,'🍣 Sushi Tokyo','Calle Serrano 789','913456789',1,'Auténtico sushi japonés','https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=800&q=80'),
 (4,'🌮 Tacos Locos','Plaza Mayor 12','914567890',1,'Tacos mexicanos tradicionales','https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=800&q=80'),
@@ -580,7 +565,7 @@ CREATE TABLE `usuarios` (
   UNIQUE KEY `email` (`email`),
   KEY `idx_username` (`username`),
   KEY `idx_email` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=59 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=61 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -647,7 +632,9 @@ INSERT INTO `usuarios` VALUES
 (55,'hola324','sfsdfsf@gmail.com','$2a$10$C8kMpbS/8//u2oYaSr73c.Abmi1ezufOTgk3j3y5hDzJwirJQnJoW','sdfsf','dsfsf','USER',1,'2026-02-02 21:17:50'),
 (56,'4234242','sdadadasda@gmail.com','$2a$10$Pq/l486Ozr.vRblQm14MxezuVT2GSy1DOrajR16dTJ70cvzVqmnbC','sdad','asdad','USER',1,'2026-02-03 20:04:02'),
 (57,'dsfsfsdf','sdfsdf@gmail.com','$2a$10$SpjCtC3qN4JII41XOMPXXOZXYkdbdtsd0H7PEa00FLoc6QVX4HfWC','sdad','asdad','USER',1,'2026-02-03 20:15:44'),
-(58,'afdsfs','sdfsdfds@gmail.com','$2a$10$azquBZRGPOt75coNrI2tEuEynKOVi91135aHXAeypiuujGJ3Ks0r.','sdad','asdad','USER',1,'2026-02-03 20:37:58');
+(58,'afdsfs','sdfsdfds@gmail.com','$2a$10$azquBZRGPOt75coNrI2tEuEynKOVi91135aHXAeypiuujGJ3Ks0r.','sdad','asdad','USER',1,'2026-02-03 20:37:58'),
+(59,'hola456','fdsfsf@gmail.com','$2a$10$/3uff69p06GHdqqQJad0Hu2IatvNcAdKnZvsnTuBY4L4VSq1qgfBy','gdf','gfd','USER',1,'2026-02-09 14:09:35'),
+(60,'hola777','hola777@gmail.com','$2a$10$EV3K4UmgMcckq/0NLsGdv.RvgDipRRZg6cyPJW6cbdZl6JYpYjpTy','dasdas','sada','USER',1,'2026-02-17 11:38:37');
 /*!40000 ALTER TABLE `usuarios` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -664,4 +651,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*M!100616 SET NOTE_VERBOSITY=@OLD_NOTE_VERBOSITY */;
 
--- Dump completed on 2026-02-03 21:37:48
+-- Dump completed on 2026-02-18 15:42:58
